@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>江戶六地藏尊</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Shippori+Mincho+B1:wght@400;600;800&family=Noto+Sans+TC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1008;
+    --paper: #f5efe3;
+    --warm: #f0e6cc;
+    --gold: #b8973a;
+    --gold-light: #d4b96a;
+    --rust: #8b3a1a;
+    --moss: #3d5a3e;
+    --slate: #4a5568;
+    --seal: #c0392b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Noto Serif TC', serif;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ccircle cx='30' cy='30' r='0.8' fill='%23b8973a' opacity='0.12'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: radial-gradient(ellipse 80% 60% at 50% 40%, #2a1a08 0%, #0f0a04 100%);
+  }
+  .hero-bg-circles { position: absolute; inset: 0; pointer-events: none; }
+  .hero-bg-circles circle { animation: pulse 4s ease-in-out infinite alternate; }
+  @keyframes pulse { from { opacity: 0.04; } to { opacity: 0.12; } }
+  .hero-frame { position: relative; z-index: 2; text-align: center; padding: 3rem 2rem; }
+  .hero-en { font-family: 'Noto Sans TC', sans-serif; font-size: .75rem; letter-spacing: .4em; color: var(--gold-light); opacity: .7; margin-bottom: 1.5rem; text-transform: uppercase; }
+  .hero-kanji { font-family: 'Shippori Mincho B1', serif; font-weight: 800; font-size: clamp(3.5rem, 12vw, 7rem); color: var(--gold); line-height: 1.05; letter-spacing: .12em; text-shadow: 0 0 60px rgba(184,151,58,.35), 0 4px 20px rgba(0,0,0,.6); animation: fadeUp .9s ease both; }
+  .hero-sub { margin-top: 1.8rem; font-size: clamp(.9rem, 2vw, 1.05rem); color: rgba(245,239,227,.65); letter-spacing: .15em; font-weight: 300; animation: fadeUp .9s .2s ease both; }
+  .hero-divider { width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold), transparent); margin: 2rem auto; animation: fadeUp .9s .35s ease both; }
+  .hero-scroll { margin-top: 3rem; font-size: .72rem; letter-spacing: .35em; color: rgba(245,239,227,.4); animation: bounce 2s infinite; }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(24px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes bounce { 0%,100% { transform:translateY(0); } 50% { transform:translateY(6px); } }
+  .lotus-deco { position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); width: 100%; opacity: .25; }
+  section { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 5rem 2rem; }
+  .section-label { font-family: 'Noto Sans TC', sans-serif; font-size: .68rem; letter-spacing: .5em; color: var(--gold); text-transform: uppercase; margin-bottom: 1rem; display: flex; align-items: center; gap: .8rem; }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold-light), transparent); opacity: .4; }
+  h2 { font-family: 'Shippori Mincho B1', serif; font-size: clamp(1.6rem, 4vw, 2.2rem); color: var(--rust); margin-bottom: 2rem; line-height: 1.4; }
+  .prose { font-size: 1.05rem; line-height: 2.1; color: #2c1e10; font-weight: 300; }
+  .prose p { margin-bottom: 1.4rem; }
+  .prose strong { color: var(--rust); font-weight: 600; }
+  .timeline { position: relative; padding-left: 3rem; margin: 3rem 0; }
+  .timeline::before { content: ''; position: absolute; left: .9rem; top: 0; bottom: 0; width: 2px; background: linear-gradient(180deg, var(--gold), var(--moss), transparent); opacity: .4; }
+  .tl-item { position: relative; margin-bottom: 2rem; animation: fadeUp .6s ease both; }
+  .tl-item::before { content: ''; position: absolute; left: -2.2rem; top: .35rem; width: 10px; height: 10px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 3px rgba(184,151,58,.2); }
+  .tl-year { font-family: 'Shippori Mincho B1', serif; font-size: .8rem; color: var(--gold); letter-spacing: .15em; margin-bottom: .3rem; }
+  .tl-content { font-size: .95rem; line-height: 1.8; color: #3a2c18; }
+  .temple-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.6rem; margin-top: 3rem; }
+  .temple-card { background: linear-gradient(145deg, #fffdf5, #f5e8cc); border: 1px solid rgba(184,151,58,.25); border-radius: 4px; overflow: hidden; transition: transform .3s, box-shadow .3s; position: relative; }
+  .temple-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(139,58,26,.15); }
+  .temple-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--gold), var(--rust)); }
+  .card-num { position: absolute; top: 1rem; right: 1rem; font-family: 'Shippori Mincho B1', serif; font-size: 2.5rem; color: var(--gold); opacity: .15; line-height: 1; }
+  .card-img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; filter: sepia(15%) contrast(1.05); }
+  .card-body { padding: 1.3rem 1.4rem 1.5rem; }
+  .card-road { font-size: .68rem; letter-spacing: .3em; color: var(--moss); margin-bottom: .5rem; font-family: 'Noto Sans TC', sans-serif; }
+  .card-title { font-family: 'Shippori Mincho B1', serif; font-size: 1.3rem; color: var(--rust); margin-bottom: .4rem; }
+  .card-year { font-size: .75rem; color: var(--gold); letter-spacing: .15em; margin-bottom: .8rem; }
+  .card-desc { font-size: .88rem; line-height: 1.8; color: #3a2c18; }
+  .card-addr { margin-top: .9rem; font-size: .75rem; color: var(--slate); display: flex; align-items: flex-start; gap: .4rem; font-family: 'Noto Sans TC', sans-serif; }
+  .badge-lost { display: inline-block; font-size: .62rem; padding: .2em .6em; background: rgba(139,58,26,.1); color: var(--rust); border: 1px solid rgba(139,58,26,.25); border-radius: 2px; letter-spacing: .1em; margin-left: .5rem; vertical-align: middle; }
+  .ornament { text-align: center; color: var(--gold); opacity: .35; margin: 1rem 0; font-size: 1.2rem; letter-spacing: .5em; }
+  .map-section { background: linear-gradient(180deg, var(--paper), var(--warm)); padding: 5rem 2rem; }
+  .map-inner { max-width: 900px; margin: 0 auto; }
+  .map-container { margin-top: 2rem; border: 1px solid rgba(184,151,58,.3); border-radius: 4px; overflow: hidden; box-shadow: 0 8px 32px rgba(26,16,8,.12); }
+  .map-container iframe { width: 100%; height: 480px; border: none; display: block; }
+  .faith-band { background: #2a1a08; color: var(--paper); padding: 5rem 2rem; position: relative; overflow: hidden; }
+  .faith-band::before { content: '地'; position: absolute; right: -2rem; top: -3rem; font-family: 'Shippori Mincho B1', serif; font-size: 20rem; color: rgba(184,151,58,.04); pointer-events: none; line-height: 1; }
+  .faith-inner { max-width: 900px; margin: 0 auto; }
+  .faith-inner h2 { color: var(--gold); }
+  .faith-inner .prose { color: rgba(245,239,227,.8); }
+  .faith-inner .section-label { color: var(--gold-light); opacity: .7; }
+  .pilgrimage { background: var(--warm); border: 1px solid rgba(184,151,58,.2); border-radius: 4px; padding: 2rem 2.2rem; margin-top: 3rem; }
+  .pilgrimage h3 { font-family: 'Shippori Mincho B1', serif; font-size: 1.2rem; color: var(--rust); margin-bottom: 1rem; }
+  .pilgrimage ol { list-style: none; counter-reset: step; }
+  .pilgrimage li { counter-increment: step; position: relative; padding: .5rem 0 .5rem 2.4rem; font-size: .92rem; line-height: 1.7; border-bottom: 1px dashed rgba(184,151,58,.2); color: #3a2c18; }
+  .pilgrimage li:last-child { border-bottom: none; }
+  .pilgrimage li::before { content: counter(step); position: absolute; left: 0; top: .5rem; width: 1.6rem; height: 1.6rem; background: var(--gold); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .72rem; font-weight: 700; font-family: 'Noto Sans TC', sans-serif; }
+  footer { background: #0f0a04; color: rgba(245,239,227,.35); text-align: center; padding: 3rem 2rem; font-size: .78rem; letter-spacing: .15em; font-family: 'Noto Sans TC', sans-serif; }
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th { padding: .7rem 1rem; text-align: left; font-weight: 600; letter-spacing: .1em; background: #2a1a08; color: var(--gold); }
+  td { padding: .7rem 1rem; }
+  tr:nth-child(odd) td { background: var(--warm); }
+  tr:nth-child(even) td { background: #fff; }
+  tr td { border-bottom: 1px solid rgba(184,151,58,.15); }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <svg class="hero-bg-circles" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+    <circle cx="600" cy="400" r="350" fill="none" stroke="#b8973a" stroke-width="1" opacity="0.08"/>
+    <circle cx="600" cy="400" r="250" fill="none" stroke="#b8973a" stroke-width="1" opacity="0.06"/>
+    <circle cx="600" cy="400" r="150" fill="none" stroke="#b8973a" stroke-width="1" opacity="0.1"/>
+    <circle cx="600" cy="400" r="500" fill="none" stroke="#b8973a" stroke-width="0.5" opacity="0.04"/>
+  </svg>
+  <div class="hero-frame">
+    <div class="hero-en">Edo Roku Jizōson · 江戶時代 · 東京歷史文化</div>
+    <div class="hero-kanji">江戶六地藏尊</div>
+    <div class="hero-divider"></div>
+    <div class="hero-sub">宝永三年（1706）〜 享保五年（1720）｜六街道守護神</div>
+    <div class="hero-scroll">▼ SCROLL</div>
+  </div>
+  <svg class="lotus-deco" viewBox="0 0 1200 80" preserveAspectRatio="none">
+    <path d="M0,60 Q100,20 200,50 Q300,80 400,40 Q500,10 600,50 Q700,80 800,40 Q900,10 1000,50 Q1100,80 1200,60 L1200,80 L0,80Z" fill="#f5efe3"/>
+  </svg>
+</div>
+
+<section class="reveal">
+  <div class="section-label">Origin Story</div>
+  <h2>發願的故事 ── 一個奇蹟的開始</h2>
+  <div class="prose">
+    <p>寶永三年（1706年），江戶深川一位名叫<strong>地藏坊正元</strong>的居士，年輕時曾身患重病，生死難料。他與雙親一同向地藏菩薩虔誠祈願，祈求病癒。奇蹟降臨，正元不僅康復，更立下宏願，要以實際行動回報地藏菩薩的慈悲。</p>
+    <p>他仰望<strong>京都六地藏</strong>的前例——平安時代平清盛命西光法師，於洛中洛外六條街道入口各建六角堂，供奉地藏尊以護佑旅人。正元決定仿照此例，在江戶通往各地的六條主要街道入口，各建立一座巨型青銅地藏菩薩坐像，守護出入江戶的旅人，同時祈願眾人無病消災、旅途平安。</p>
+    <p>正元走遍江戶市中，廣募善信布施。超過<strong>七萬兩千名</strong>寄進者的名字，至今仍鐫刻於各像的台座與蓮花之上，是江戶庶民信仰力量的珍貴見證。從宝永五年（1708年）到享保五年（1720年），歷時整整<strong>十二年</strong>，六座像高約270公分的「丈六」地藏菩薩像相繼完成。</p>
+  </div>
+  <div class="ornament">❧ ✦ ❧</div>
+  <div class="timeline reveal">
+    <div class="tl-item"><div class="tl-year">宝永三年（1706）</div><div class="tl-content">地藏坊正元發願，開始廣募寄進，計畫於江戶六街道出入口建立地藏菩薩坐像。</div></div>
+    <div class="tl-item"><div class="tl-year">宝永五年（1708）</div><div class="tl-content">第一番・品川寺（東海道）完成，由神田鍋町鑄物師太田駿河守藤原正儀鑄造。</div></div>
+    <div class="tl-item"><div class="tl-year">宝永七年（1710）</div><div class="tl-content">第二番・東禅寺（奥州街道）完成，此像以弁柄色漆塗飾，有別於其他各像。</div></div>
+    <div class="tl-item"><div class="tl-year">正徳二年（1712）</div><div class="tl-content">第三番・太宗寺（甲州街道）完成。像內曾納有《刊本江戶六地藏建立之略縁起》。</div></div>
+    <div class="tl-item"><div class="tl-year">正徳四年（1714）</div><div class="tl-content">第四番・眞性寺（中山道）完成。此像曾歷關東大震災、二戰空襲均有損毀，後均修復。</div></div>
+    <div class="tl-item"><div class="tl-year">享保二年（1717）</div><div class="tl-content">第五番・霊巖寺（水戸街道）完成，至今保存完好。</div></div>
+    <div class="tl-item"><div class="tl-year">享保五年（1720）</div><div class="tl-content">第六番・永代寺（千葉街道）完成，歷時十二年的大願圓滿。惟此像後因明治廢佛毀釋而遭毀，為六像中唯一不復存在者。</div></div>
+  </div>
+</section>
+
+<section class="reveal" style="padding-top:0;">
+  <div class="section-label">The Six Temples</div>
+  <h2>六座寺院 · 六條街道</h2>
+  <div class="prose"><p>六座地藏像如六位忠誠的守門神，分守江戶通往各方的要道。每一尊均為露天青銅坐像，像高約270公分（「丈六」），鑄造時曾施以鎏金，歲月流逝，今日大多僅餘金箔痕跡。</p></div>
+
+  <div class="temple-grid">
+    <!-- 1 品川寺 -->
+    <div class="temple-card reveal">
+      <div class="card-num">一</div>
+      <img class="card-img" src="images/honsenji.jpg" alt="品川寺江戶六地藏">
+      <div class="card-body">
+        <div class="card-road">東海道 · 第一番</div>
+        <div class="card-title">品川寺（ほんせんじ）</div>
+        <div class="card-year">宝永五年（1708）建立</div>
+        <div class="card-desc">六地藏中第一番完成者。品川是東海道的第一個宿場（驛站），由此南下可抵京都。真言宗寺院，古老殿堂林立，境內氣氛幽靜。此像自建立以來，守護著無數踏上東海道旅途的旅人。</div>
+        <div class="card-addr"><span>📍</span><span>品川区南品川 3-5-17</span></div>
+      </div>
+    </div>
+    <!-- 2 東禅寺 -->
+    <div class="temple-card reveal">
+      <div class="card-num">二</div>
+      <img class="card-img" src="images/tozenji.jpg" alt="東禅寺江戶六地藏">
+      <div class="card-body">
+        <div class="card-road">奥州街道 · 第二番</div>
+        <div class="card-title">東禅寺（とうぜんじ）</div>
+        <div class="card-year">宝永七年（1710）建立</div>
+        <div class="card-desc">曹洞宗寺院，位於東浅草。此像以弁柄色（紅褐色）漆塗飾，在六像中獨樹一格。奥州街道通往東北地方，為重要的軍事與物流要道。寺院環境清幽，偶有江戶時代的古蹟遺跡可供參訪。</div>
+        <div class="card-addr"><span>📍</span><span>台東区東浅草 2-12-13</span></div>
+      </div>
+    </div>
+    <!-- 3 太宗寺 -->
+    <div class="temple-card reveal">
+      <div class="card-num">三</div>
+      <img class="card-img" src="images/taisoji.jpg" alt="太宗寺江戶六地藏">
+      <div class="card-body">
+        <div class="card-road">甲州街道 · 第三番</div>
+        <div class="card-title">太宗寺（たいそうじ）</div>
+        <div class="card-year">正徳二年（1712）建立</div>
+        <div class="card-desc">浄土宗寺院，位於新宿區，地處繁華都心。甲州街道通往甲斐國（今山梨縣）。像內曾供奉《刊本江戶六地藏建立之略縁起》，是了解六地藏建立緣由的重要史料。附近即為現代繁榮的新宿商業區，古今對比鮮明。</div>
+        <div class="card-addr"><span>📍</span><span>新宿区新宿 2-9-2</span></div>
+      </div>
+    </div>
+    <!-- 4 眞性寺 -->
+    <div class="temple-card reveal">
+      <div class="card-num">四</div>
+      <img class="card-img" src="images/shinshoji.jpg" alt="眞性寺江戶六地藏">
+      <div class="card-body">
+        <div class="card-road">中山道 · 第四番</div>
+        <div class="card-title">眞性寺（しんしょうじ）</div>
+        <div class="card-year">正徳四年（1714）建立</div>
+        <div class="card-desc">真言宗豊山派寺院，位於巣鴨。相傳為行基菩薩所開創，德川吉宗將軍曾多次駐足。此像歷經關東大震災（1923）與昭和20年（1945）空襲仍倖存，現為東京都指定有形文化財。巣鴨自古有「老人街」之稱。</div>
+        <div class="card-addr"><span>📍</span><span>豊島区巣鴨 3-21-21</span></div>
+      </div>
+    </div>
+    <!-- 5 霊巖寺 -->
+    <div class="temple-card reveal">
+      <div class="card-num">五</div>
+      <img class="card-img" src="images/reiganj.jpg" alt="霊巖寺江戶六地藏">
+      <div class="card-body">
+        <div class="card-road">水戸街道 · 第五番</div>
+        <div class="card-title">霊巖寺（れいがんじ）</div>
+        <div class="card-year">享保二年（1717）建立</div>
+        <div class="card-desc">浄土宗寺院，位於江東區白河，深川的心臟地帶。水戸街道通往水戸（今茨城縣）。此像至今保存完好，且本寺正是地藏坊正元居住之深川所在，與發願因緣深厚。另附近亦有江戶時代松平定信的墓所。</div>
+        <div class="card-addr"><span>📍</span><span>江東区白河 1-3-32</span></div>
+      </div>
+    </div>
+    <!-- 6 永代寺 -->
+    <div class="temple-card reveal">
+      <div class="card-num">六</div>
+      <img class="card-img" src="images/jomyoin.jpg" alt="浄名院（永代寺代佛）">
+      <div class="card-body">
+        <div class="card-road">千葉街道 · 第六番</div>
+        <div class="card-title">永代寺（えいたいじ）<span class="badge-lost">已毀</span></div>
+        <div class="card-year">享保五年（1720）建立・明治初年廢</div>
+        <div class="card-desc">六地藏中唯一不復存在者。明治初年「廢佛毀釋」運動中，永代寺遭廢棄，此像亦同遭毀損。六番的代替佛像，目前供奉於上野的<strong>浄名院</strong>（台東区上野桜木 2-6-4）。千葉街道是通往千葉方向的要道。</div>
+        <div class="card-addr"><span>📍</span><span>代佛：浄名院（台東区上野桜木 2-6-4）</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="faith-band">
+  <div class="faith-inner">
+    <div class="section-label">Jizō Bosatsu</div>
+    <h2>地藏菩薩信仰</h2>
+    <div class="prose">
+      <p>地藏菩薩（梵語：Kṣitigarbha），在日本民間信仰中是最親近庶民的菩薩之一。祂被認為是在釋迦涅槃之後、彌勒菩薩降世之前，於「無佛時代」中守護眾生、特別是救助亡魂與受苦孩童的菩薩。</p>
+      <p>在日本，石造或銅造的<strong>地藏像</strong>遍布各地路邊、寺院，人們以紅色涎掛（圍兜）為其裝扮，祈求子孫健康、旅途平安、亡者冥福。「六地藏」的傳統，源自佛教的「六道」概念——以六尊地藏分別守護地獄道、餓鬼道、畜生道、阿修羅道、人道、天道的六道眾生。</p>
+      <p>江戶六地藏尊的設立，正是將這一信仰與城市防護的概念結合：讓地藏菩薩坐鎮各街道入口，如守護神般庇佑進出江戶的萬千旅人與居民。七萬餘名的庶民寄進者，是整個江戶時代城市共同體信仰心的最佳象徵。</p>
+    </div>
+    <div class="pilgrimage">
+      <h3>🗺 現代巡拜路線建議</h3>
+      <ol>
+        <li><strong>品川寺</strong>（品川）→ 京急電車「青物横丁」站步行約5分鐘</li>
+        <li><strong>太宗寺</strong>（新宿）→ 地鐵「新宿三丁目」站步行約3分鐘</li>
+        <li><strong>眞性寺</strong>（巣鴨）→ JR「巣鴨」站步行約1分鐘</li>
+        <li><strong>東禅寺</strong>（東浅草）→ 都営浅草線「浅草」站步行約15分鐘</li>
+        <li><strong>霊巖寺</strong>（白河）→ 地鐵「清澄白河」站步行約10分鐘</li>
+        <li><strong>浄名院</strong>（上野桜木，永代寺代佛）→ JR「鶯谷」站步行約10分鐘</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<div class="map-section">
+  <div class="map-inner reveal">
+    <div class="section-label">Location Map</div>
+    <h2>六寺位置地圖</h2>
+    <div class="map-container">
+      <iframe src="https://www.google.com/maps/embed?pb=!1m46!1m12!1m3!1d103127.5!2d139.7503!3d35.6762!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!4m31!3e0!4m5!1s0x6018891b617c6be3%3A0xf99df5f74afa9a30!2z5ZCN5bed5a6544CA!3m2!1d35.6076!2d139.7377!4m5!1s0x60188e2e03a04543%3A0xf!2z5p2x56We5a65!3m2!1d35.7257!2d139.7977!4m5!1s0x60188d40a5bfae5b%3A0x1!2z5aSq5a6544CA!3m2!1d35.6913!2d139.7069!4m5!1s0x6018922c81e3a4b9%3A0x1!2z55Sw5oCn5a65!3m2!1d35.7317!2d139.7398!4m5!1s0x601889c6!2z6Zu75b6344CA!3m2!1d35.6784!2d139.7946!5e0!3m2!1szh-TW!2sjp" allowfullscreen loading="lazy" title="江戶六地藏尊位置地圖"></iframe>
+    </div>
+    <div style="margin-top:2rem; overflow-x:auto;">
+      <table>
+        <thead>
+          <tr><th>番號</th><th>街道</th><th>寺院</th><th>建立年</th><th>現狀</th></tr>
+        </thead>
+        <tbody>
+          <tr><td style="color:var(--gold);font-family:'Shippori Mincho B1',serif;">第一番</td><td>東海道</td><td><strong>品川寺</strong></td><td>宝永5年（1708）</td><td style="color:var(--moss);">✓ 現存</td></tr>
+          <tr><td style="color:var(--gold);font-family:'Shippori Mincho B1',serif;">第二番</td><td>奥州街道</td><td><strong>東禅寺</strong></td><td>宝永7年（1710）</td><td style="color:var(--moss);">✓ 現存</td></tr>
+          <tr><td style="color:var(--gold);font-family:'Shippori Mincho B1',serif;">第三番</td><td>甲州街道</td><td><strong>太宗寺</strong></td><td>正徳2年（1712）</td><td style="color:var(--moss);">✓ 現存</td></tr>
+          <tr><td style="color:var(--gold);font-family:'Shippori Mincho B1',serif;">第四番</td><td>中山道</td><td><strong>眞性寺</strong></td><td>正徳4年（1714）</td><td style="color:var(--moss);">✓ 現存（東京都指定文化財）</td></tr>
+          <tr><td style="color:var(--gold);font-family:'Shippori Mincho B1',serif;">第五番</td><td>水戸街道</td><td><strong>霊巖寺</strong></td><td>享保2年（1717）</td><td style="color:var(--moss);">✓ 現存</td></tr>
+          <tr><td style="color:var(--gold);font-family:'Shippori Mincho B1',serif;">第六番</td><td>千葉街道</td><td><strong>永代寺 → 浄名院（代佛）</strong></td><td>享保5年（1720）</td><td style="color:var(--rust);">✗ 原像已毀（代佛存）</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div style="color:rgba(184,151,58,.5);font-size:1.4rem;margin-bottom:1rem;font-family:'Shippori Mincho B1',serif;">江戶六地藏尊</div>
+  <div>宝永三年（1706）〜 享保五年（1720）</div>
+  <div style="margin-top:.5rem;opacity:.6;">Edo Roku Jizōson · Designed by Masky Wang</div>
+</footer>
+
+<script>
+  const els = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); io.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  els.forEach(el => io.observe(el));
+</script>
+</body>
+</html>
