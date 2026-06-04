@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>老闆的「名牌」與我的漢堡夢 | 互動四格漫畫</title>
+    <meta name="description" content="這是一個關於員工 ac 聽信老闆黃員外的股市名牌，從 $800 貴婦百貨純牛肉漢堡落得只能吃 $50 超商熱狗的搞笑互動四格漫畫。配有語音播放功能！">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+TC:wght@300;400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #ff3366;
+            --secondary: #00f0ff;
+            --accent: #ffb800;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --font-family: 'Outfit', 'Noto Sans TC', sans-serif;
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            min-height: 100/Users/masky/Documents/antigravityuse/index.htmlvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(255, 51, 102, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(0, 240, 255, 0.08) 0%, transparent 40%);
+            padding-bottom: 50px;
+        }
+
+        header {
+            text-align: center;
+            margin: 40px 20px 20px 20px;
+            z-index: 10;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Comic Grid */
+        .comic-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 1100px;
+            width: 90%;
+            margin-top: 30px;
+            z-index: 10;
+        }
+
+        /* Comic Card */
+        .comic-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: var(--shadow);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .comic-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 60%, rgba(0, 0, 0, 0.8) 100%);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .comic-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: rgba(0, 240, 255, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 240, 255, 0.1);
+        }
+
+        .comic-card.speaking {
+            border-color: var(--primary);
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.3);
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.02); }
+            50% { transform: scale(1.03); }
+        }
+
+        .panel-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(11, 15, 25, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 5;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(5px);
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 100%; /* Square ratio */
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .comic-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .comic-card:hover .comic-image {
+            transform: scale(1.05);
+        }
+
+        /* Card Content */
+        .card-content {
+            padding: 24px;
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: rgba(11, 15, 25, 0.4);
+            border-top: 1px solid var(--card-border);
+            z-index: 3;
+        }
+
+        .dialogue-box {
+            margin-bottom: 20px;
+        }
+
+        .narration {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-style: italic;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .narration::before {
+            content: '🎙️';
+        }
+
+        .speech-bubble {
+            margin-top: 8px;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .char-label {
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .char-ac {
+            background: rgba(255, 51, 102, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .char-huang {
+            background: rgba(0, 240, 255, 0.15);
+            color: var(--secondary);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+        }
+
+        .char-news {
+            background: rgba(255, 184, 0, 0.15);
+            color: var(--accent);
+            border: 1px solid rgba(255, 184, 0, 0.3);
+        }
+
+        /* Play Button */
+        .play-btn {
+            background: linear-gradient(135deg, rgba(255, 51, 102, 0.9), rgba(255, 51, 102, 1));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
+            width: 100%;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 51, 102, 0.5);
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+
+        .play-btn:active {
+            transform: translateY(1px);
+        }
+
+        .play-icon::before {
+            content: '▶';
+        }
+
+        .speaking .play-icon::before {
+            content: '⏸';
+        }
+
+        /* Footer info */
+        footer {
+            margin-top: 50px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-align: center;
+            z-index: 10;
+        }
+
+        /* Floating decoration blobs */
+        .blob {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: linear-gradient(180deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            filter: blur(150px);
+            opacity: 0.1;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .blob-1 {
+            top: 10%;
+            left: -100px;
+        }
+
+        .blob-2 {
+            bottom: 20%;
+            right: -100px;
+        }
+
+        /* Responsive styling */
+        @media (max-width: 768px) {
+            .comic-container {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <header>
+        <h1 id="main-title">老闆的「名牌」與我的漢堡夢</h1>
+        <p class="subtitle" id="main-subtitle">一個關於信任、美食與殘酷台股的互動四格故事 📈🍔🌭</p>
+    </header>
+
+    <main class="comic-container">
+        
+        <!-- Panel 1 -->
+        <article class="comic-card" id="card-1" data-panel="1">
+            <span class="panel-badge">1 / 4</span>
+            <div class="image-wrapper">
+                <img src="generated/panel1.png" alt="第一格：老闆黃員外在辦公室遞給ac股票名牌紙條" class="comic-image" onerror="this.src='https://placehold.co/600x600/101524/ffffff?text=Panel+1+-+Loading...'">
+            </div>
+            <div class="card-content">
+                <div class="dialogue-box">
+                    <p class="narration">發大財的預兆</p>
+                    <div class="speech-bubble">
+                        <p><span class="char-label char-huang">黃員外</span>「ac，這是我珍藏的四隻名牌……跟著買，帶你飛！」</p>
+                        <p style="margin-top: 8px;"><span class="char-label char-ac">ac (心之聲)</span>「天啊！老闆終於要帶我財富自由了嗎？！」</p>
+                    </div>
+                </div>
+                <button class="play-btn" id="play-1" onclick="playVoice(1)">
+                    <span class="play-icon"></span>
+                    <span class="btn-text">播放語音</span>
+                </button>
+            </div>
+        </article>
+
+        <!-- Panel 2 -->
+        <article class="comic-card" id="card-2" data-panel="2">
+            <span class="panel-badge">2 / 4</span>
+            <div class="image-wrapper">
+                <img src="generated/panel2.png" alt="第二格：ac在高級餐廳幸福地吃著800元漢堡" class="comic-image" onerror="this.src='https://placehold.co/600x600/101524/ffffff?text=Panel+2+-+Loading...'">
+            </div>
+            <div class="card-content">
+                <div class="dialogue-box">
+                    <p class="narration">膨脹的胃口</p>
+                    <div class="speech-bubble">
+                        <p><span class="char-label char-ac">ac</span>「唔喔喔喔！趙叔推薦的這款 $800 豪華純牛肉漢堡也太銷魂了吧！等名牌開獎，我天天中午來吃兩個！」</p>
+                    </div>
+                </div>
+                <button class="play-btn" id="play-2" onclick="playVoice(2)">
+                    <span class="play-icon"></span>
+                    <span class="btn-text">播放語音</span>
+                </button>
+            </div>
+        </article>
+
+        <!-- Panel 3 -->
+        <article class="comic-card" id="card-3" data-panel="3">
+            <span class="panel-badge">3 / 4</span>
+            <div class="image-wrapper">
+                <img src="generated/panel3.png" alt="第三格：台股大漲，但ac看著手機跌停股票痛哭" class="comic-image" onerror="this.src='https://placehold.co/600x600/101524/ffffff?text=Panel+3+-+Loading...'">
+            </div>
+            <div class="card-content">
+                <div class="dialogue-box">
+                    <p class="narration">大盤大漲，我獨慘綠</p>
+                    <div class="speech-bubble">
+                        <p><span class="char-label char-news">電視新聞</span>「台股今日再度暴漲 500 點！大盤紅通通，全民財富翻倍！」</p>
+                        <p style="margin-top: 8px;"><span class="char-label char-ac">ac</span>「為什麼大盤漲翻天……我這四隻卻全部跌停跌到深淵啊？！」</p>
+                    </div>
+                </div>
+                <button class="play-btn" id="play-3" onclick="playVoice(3)">
+                    <span class="play-icon"></span>
+                    <span class="btn-text">播放語音</span>
+                </button>
+            </div>
+        </article>
+
+        <!-- Panel 4 -->
+        <article class="comic-card" id="card-4" data-panel="4">
+            <span class="panel-badge">4 / 4</span>
+            <div class="image-wrapper">
+                <img src="generated/panel4.png" alt="第四格：ac蹲在超商外吃熱狗，老闆拍肩膀安慰" class="comic-image" onerror="this.src='https://placehold.co/600x600/101524/ffffff?text=Panel+4+-+Loading...'">
+            </div>
+            <div class="card-content">
+                <div class="dialogue-box">
+                    <p class="narration">熱狗的溫暖</p>
+                    <div class="speech-bubble">
+                        <p><span class="char-label char-huang">黃員外</span>「ac，這就叫『避險專家』。大盤漲，你的股票卻能跌，說明你的持股不受大環境影響，很有個性！」</p>
+                        <p style="margin-top: 8px;"><span class="char-label char-ac">ac</span>「老闆，我不要個性，我要吃八百元牛肉漢堡啊啊啊！」</p>
+                    </div>
+                </div>
+                <button class="play-btn" id="play-4" onclick="playVoice(4)">
+                    <span class="play-icon"></span>
+                    <span class="btn-text">播放語音</span>
+                </button>
+            </div>
+        </article>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 ac & 黃員外 - 股市名牌愛好者聯誼會</p>
+        <p style="margin-top: 8px; font-size: 0.75rem; color: var(--text-muted);">本網頁內容純屬娛樂，投資有風險，聽名牌前請先衡量熱狗價格。</p>
+    </footer>
+
+    <script>
+        // Dialogues Script with specific speaker config for voice synthesis
+        const scriptData = {
+            1: [
+                { text: "第一格。發大財的預兆。", role: "narrator" },
+                { text: "ac，這是我珍藏的四隻名牌，跟著買，帶你飛！", role: "huang" },
+                { text: "天啊！老闆終於要帶我財富自由了嗎？！", role: "ac" }
+            ],
+            2: [
+                { text: "第二格。膨脹的胃口。", role: "narrator" },
+                { text: "唔喔喔喔！趙叔推薦的這款八百元豪華純牛肉漢堡也太銷魂了吧！等名牌開獎，我天天中午來吃兩個！", role: "ac" }
+            ],
+            3: [
+                { text: "第三格。大盤大漲，我獨慘綠。", role: "narrator" },
+                { text: "今日台股再度暴漲五百點！大盤紅通通，全民財富翻倍！", role: "news" },
+                { text: "為什麼大盤漲翻天，我這四隻卻全部跌停跌到深淵啊？！", role: "ac" }
+            ],
+            4: [
+                { text: "第四格。熱狗的溫暖。", role: "narrator" },
+                { text: "ac，這就叫避險專家。大盤漲，你的股票卻能跌，說明你的持股不受大環境影響，很有個性！", role: "huang" },
+                { text: "老闆，我不要個性，我要吃八百元牛肉漢堡啊啊啊！", role: "ac" }
+            ]
+        };
+
+        let currentActivePanel = null;
+        let speechQueue = [];
+        let queueIndex = 0;
+
+        function getVoiceConfig(role) {
+            // Returns custom voice attributes based on role
+            // Default Chinese voice will be selected automatically
+            const config = {
+                pitch: 1.0,
+                rate: 1.0
+            };
+
+            if (role === 'narrator') {
+                config.pitch = 0.95;
+                config.rate = 1.05;
+            } else if (role === 'huang') {
+                // Boss voice: calm, lower pitch, slightly slower
+                config.pitch = 0.85;
+                config.rate = 0.9;
+            } else if (role === 'ac') {
+                // ac voice: energetic, higher pitch, slightly faster
+                config.pitch = 1.25;
+                config.rate = 1.15;
+            } else if (role === 'news') {
+                // News announcer: formal, loud/energetic
+                config.pitch = 1.05;
+                config.rate = 1.1;
+            }
+            return config;
+        }
+
+        function playVoice(panelId) {
+            const synth = window.speechSynthesis;
+            
+            // If already playing this panel, stop it
+            if (currentActivePanel === panelId) {
+                synth.cancel();
+                resetActiveUI();
+                currentActivePanel = null;
+                return;
+            }
+            
+            // Stop any ongoing speech
+            synth.cancel();
+            resetActiveUI();
+            
+            currentActivePanel = panelId;
+            const card = document.getElementById(`card-${panelId}`);
+            const btnText = document.querySelector(`#play-${panelId} .btn-text`);
+            
+            card.classList.add('speaking');
+            btnText.textContent = "播放中...";
+            
+            speechQueue = scriptData[panelId];
+            queueIndex = 0;
+            
+            speakNext();
+        }
+
+        function speakNext() {
+            const synth = window.speechSynthesis;
+            if (queueIndex >= speechQueue.length) {
+                // Queue finished
+                resetActiveUI();
+                currentActivePanel = null;
+                return;
+            }
+            
+            const item = speechQueue[queueIndex];
+            const utterance = new SpeechSynthesisUtterance(item.text);
+            utterance.lang = 'zh-TW';
+            
+            // Apply voice parameters
+            const config = getVoiceConfig(item.role);
+            utterance.pitch = config.pitch;
+            utterance.rate = config.rate;
+            
+            // Try to find a Chinese voice (zh-TW or zh-HK or zh-CN)
+            const voices = synth.getVoices();
+            const preferredVoice = voices.find(voice => voice.lang.includes('zh-TW')) || 
+                                  voices.find(voice => voice.lang.includes('zh-HK')) ||
+                                  voices.find(voice => voice.lang.includes('zh-CN')) ||
+                                  voices.find(voice => voice.lang.includes('zh'));
+            if (preferredVoice) {
+                utterance.voice = preferredVoice;
+            }
+
+            utterance.onend = () => {
+                queueIndex++;
+                speakNext();
+            };
+
+            utterance.onerror = (e) => {
+                console.error("Speech error:", e);
+                resetActiveUI();
+                currentActivePanel = null;
+            };
+
+            synth.speak(utterance);
+        }
+
+        function resetActiveUI() {
+            document.querySelectorAll('.comic-card').forEach(c => {
+                c.classList.remove('speaking');
+            });
+            document.querySelectorAll('.play-btn .btn-text').forEach(t => {
+                t.textContent = "播放語音";
+            });
+        }
+        
+        // Populate voices asynchronously for Chrome/Safari compatibility
+        if (typeof speechSynthesis !== 'undefined' && speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = () => {
+                // Forces loading of voices
+                window.speechSynthesis.getVoices();
+            };
+        }
+    </script>
+</body>
+</html>
