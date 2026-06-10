@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>黎曼猜想 — 數學最深的謎</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --border: #1e1e2e;
+    --accent: #7c6af7;
+    --accent2: #f06292;
+    --accent3: #4dd0e1;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --gold: #ffd700;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', serif;
+    line-height: 1.8;
+    overflow-x: hidden;
+  }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    overflow: hidden;
+  }
+
+  #hero-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.55;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    padding: 2rem;
+  }
+
+  .hero-eyebrow {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1.2rem;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.8rem, 8vw, 6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+  }
+
+  .hero-formula {
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    color: var(--gold);
+    font-family: 'Georgia', serif;
+    margin: 1.5rem 0;
+    text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+  }
+
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto 2.5rem;
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--muted);
+    font-size: 0.85rem;
+    animation: bounce 2s infinite;
+  }
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-8px); }
+  }
+
+  /* Navigation */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10, 10, 15, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.8rem 2rem;
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  nav a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-family: 'Courier New', monospace;
+    transition: color 0.2s;
+  }
+
+  nav a:hover { color: var(--accent); }
+
+  /* Sections */
+  section {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 5rem 2rem;
+  }
+
+  .section-label {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  h2 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  p { color: var(--muted); margin-bottom: 1.2rem; }
+  p strong { color: var(--text); }
+
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(124, 106, 247, 0.1), rgba(240, 98, 146, 0.08));
+    border: 1px solid rgba(124, 106, 247, 0.3);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+
+  .formula-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 2rem;
+    margin: 2rem 0;
+    text-align: center;
+    font-size: 1.3rem;
+    color: var(--gold);
+    font-family: 'Georgia', serif;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .formula-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, rgba(255, 215, 0, 0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .formula-box .label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--muted);
+    font-family: 'Courier New', monospace;
+    letter-spacing: 0.1em;
+    margin-bottom: 0.5rem;
+  }
+
+  /* Timeline */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--accent2));
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2.5rem;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.4rem;
+    top: 0.4rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px var(--accent);
+  }
+
+  .timeline-year {
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 0.3rem;
+  }
+
+  .timeline-title {
+    font-size: 1.05rem;
+    color: var(--text);
+    margin-bottom: 0.3rem;
+  }
+
+  .timeline-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin: 0;
+  }
+
+  /* Zeta Visualizer */
+  .visualizer-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    margin: 2rem 0;
+  }
+
+  .vis-controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 1.5rem;
+  }
+
+  .vis-controls label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-family: 'Courier New', monospace;
+  }
+
+  .vis-controls input[type=range] {
+    accent-color: var(--accent);
+    width: 140px;
+  }
+
+  #zeta-canvas {
+    width: 100%;
+    height: 320px;
+    border-radius: 8px;
+    background: #08080e;
+    display: block;
+  }
+
+  .vis-info {
+    margin-top: 1rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    color: var(--accent3);
+  }
+
+  /* Zeros strip */
+  #zeros-canvas {
+    width: 100%;
+    height: 200px;
+    border-radius: 8px;
+    background: #08080e;
+    display: block;
+    margin: 1.5rem 0;
+  }
+
+  /* Cards */
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    transform: translateY(-4px);
+  }
+
+  .card-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+  .card h3 { font-size: 1rem; margin-bottom: 0.5rem; color: var(--text); }
+  .card p { font-size: 0.875rem; margin: 0; }
+
+  /* Prize banner */
+  .prize-banner {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.08), rgba(255, 165, 0, 0.05));
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 16px;
+    padding: 2.5rem;
+    text-align: center;
+    margin: 2rem 0;
+  }
+
+  .prize-amount {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: block;
+    text-shadow: 0 0 40px rgba(255, 215, 0, 0.4);
+  }
+
+  .prize-label {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  /* Separator */
+  .sep {
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 2px;
+    margin: 1rem 0 2rem;
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    nav { gap: 1rem; padding: 0.8rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Millennium Prize Problem</div>
+    <h1>黎曼猜想</h1>
+    <div class="hero-formula">ζ(s) = 0 ⟹ Re(s) = ½</div>
+    <p class="hero-sub">
+      一個 1859 年提出、至今無人能解的數學猜想，<br>
+      它隱藏著所有質數分佈的終極秘密。
+    </p>
+  </div>
+  <div class="scroll-hint">▼ 向下探索</div>
+</div>
+
+<!-- Nav -->
+<nav>
+  <a href="#what">什麼是黎曼猜想</a>
+  <a href="#zeta">Zeta 函數</a>
+  <a href="#zeros">非顯然零點</a>
+  <a href="#primes">質數的聯繫</a>
+  <a href="#history">歷史脈絡</a>
+  <a href="#impact">為何重要</a>
+</nav>
+
+<!-- What is it -->
+<section id="what">
+  <div class="section-label">01 — 核心命題</div>
+  <h2>什麼是黎曼猜想？</h2>
+  <div class="sep"></div>
+
+  <p>
+    1859 年，德國數學家 <strong>波恩哈德·黎曼（Bernhard Riemann）</strong> 在一篇研究質數分佈的論文中，
+    幾乎是「順帶一提」地提出了這個猜想。他認為某個複變函數的所有「有趣零點」，
+    都恰好落在複數平面上一條特定的直線——實部等於 ½ 的臨界線。
+  </p>
+
+  <div class="highlight-box">
+    <strong style="color: var(--text);">猜想的核心陳述：</strong><br><br>
+    黎曼 Zeta 函數 ζ(s) 的所有<strong>非顯然零點</strong>，
+    其實部（Real Part）均等於 <strong style="color: var(--gold);">1/2</strong>。
+    也就是說，它們都落在複數平面的臨界線 <em>Re(s) = ½</em> 上。
+  </div>
+
+  <p>
+    這個陳述看似簡單，卻在 165 年後的今天仍未被證明或推翻。
+    它是克雷數學研究所列出的 <strong>七大千禧年大獎問題</strong> 之一，
+    解決者可獲得 <strong style="color: var(--gold);">100 萬美元</strong> 獎金。
+  </p>
+</section>
+
+<!-- Zeta -->
+<section id="zeta">
+  <div class="section-label">02 — 函數定義</div>
+  <h2>黎曼 Zeta 函數</h2>
+  <div class="sep"></div>
+
+  <p>
+    Zeta 函數最基本的形式，是一個無窮級數求和。
+    對實部大於 1 的複數 s，它定義為：
+  </p>
+
+  <div class="formula-box">
+    <span class="label">基本定義（Re(s) > 1）</span>
+    ζ(s) = 1 + 1/2<sup>s</sup> + 1/3<sup>s</sup> + 1/4<sup>s</sup> + ⋯ = Σ<sub>n=1</sub><sup>∞</sup> 1/n<sup>s</sup>
+  </div>
+
+  <p>
+    透過<strong>解析延拓</strong>，這個函數可以延伸到整個複數平面（除了 s=1 這個極點）。
+    延拓後的函數在某些點上取值為零，這些點就是「零點」。
+  </p>
+
+  <div class="formula-box">
+    <span class="label">歐拉乘積公式（連結 Zeta 與質數）</span>
+    ζ(s) = ∏<sub>p 質數</sub> 1 / (1 − p<sup>−s</sup>)
+  </div>
+
+  <p>
+    這個由<strong>歐拉</strong>發現的乘積公式，揭示了 Zeta 函數與所有質數的深刻聯繫——
+    每一個質數都貢獻了乘積中的一個因子。
+  </p>
+
+  <!-- Interactive Visualizer -->
+  <div class="visualizer-wrap">
+    <strong style="color: var(--text);">互動視覺化：臨界帶上的 ζ(½ + it)</strong>
+    <p style="font-size: 0.875rem; margin: 0.5rem 0 1.5rem;">
+      調整參數，觀察 Zeta 函數在臨界線上的軌跡。當軌跡通過原點時，即為一個非顯然零點。
+    </p>
+    <div class="vis-controls">
+      <label>t 範圍：<span id="t-val">0 – 50</span></label>
+      <input type="range" id="t-range" min="10" max="200" value="50" step="5">
+      <label style="margin-left: 1rem;">速度</label>
+      <input type="range" id="speed-range" min="1" max="5" value="2">
+    </div>
+    <canvas id="zeta-canvas"></canvas>
+    <div class="vis-info" id="zeta-info">Re(ζ) = —　Im(ζ) = —</div>
+  </div>
+</section>
+
+<!-- Zeros -->
+<section id="zeros">
+  <div class="section-label">03 — 兩種零點</div>
+  <h2>顯然零點 vs 非顯然零點</h2>
+  <div class="sep"></div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">📍</div>
+      <h3>顯然零點（Trivial Zeros）</h3>
+      <p>位於負偶數整數處：s = −2, −4, −6, −8, ⋯<br>
+      它們的存在容易理解，來自函數的對稱性（函數方程）。</p>
+    </div>
+    <div class="card" style="border-color: rgba(124, 106, 247, 0.4);">
+      <div class="card-icon">🎯</div>
+      <h3>非顯然零點（Non-trivial Zeros）</h3>
+      <p>位於臨界帶 0 < Re(s) < 1 之間。<br>
+      黎曼猜想斷言：它們<em>全都</em>在 Re(s) = ½ 的臨界線上。</p>
+    </div>
+  </div>
+
+  <p>
+    目前已用電腦驗算超過 <strong>10<sup>13</sup> 個</strong>非顯然零點，
+    它們全部落在臨界線上。但「驗算再多個例子」並不等於「數學證明」。
+  </p>
+
+  <canvas id="zeros-canvas"></canvas>
+  <p style="font-size: 0.8rem; text-align: center; margin-top: -0.5rem;">
+    ↑ 複數平面示意圖：紫色點為已知非顯然零點，黃色直線為臨界線 Re(s) = ½
+  </p>
+
+  <p>
+    前幾個非顯然零點的虛部（t 值）約為：<br>
+    <span style="color: var(--accent); font-family: monospace;">
+      14.135、21.022、25.011、30.425、32.935、37.586、40.919…
+    </span>
+  </p>
+</section>
+
+<!-- Primes -->
+<section id="primes">
+  <div class="section-label">04 — 質數聯繫</div>
+  <h2>為什麼質數學家在乎它？</h2>
+  <div class="sep"></div>
+
+  <p>
+    黎曼猜想之所以重要，是因為它與<strong>質數分佈</strong>直接相關。
+    黎曼在論文中給出了一個計算「不超過 x 的質數個數 π(x)」的精確公式：
+  </p>
+
+  <div class="formula-box">
+    <span class="label">黎曼明確公式（示意）</span>
+    π(x) ≈ Li(x) − Σ<sub>ρ</sub> Li(x<sup>ρ</sup>) − log 2 + ⋯
+  </div>
+
+  <p>
+    公式中的 <strong>ρ</strong> 正是 Zeta 函數的非顯然零點！
+    每個零點都像一個「修正項」，讓質數的估計更精確。
+    若黎曼猜想成立（所有 ρ 的實部都是 ½），
+    則這些修正項的振盪幅度受到最優控制，
+    質數的分佈誤差也會達到最佳可能的界限。
+  </p>
+
+  <div class="highlight-box">
+    <strong style="color: var(--text);">直觀類比：</strong><br><br>
+    想像質數是一串不規則的鼓聲。Zeta 函數的零點，就是這段鼓聲的「頻率分解」。
+    黎曼猜想說所有這些頻率的「阻尼係數」都一樣——
+    沒有哪個頻率比其他的更強或更弱，整體是最和諧的。
+  </div>
+
+  <p>
+    數論中有數百條定理形如「<em>假設黎曼猜想成立，則……</em>」。
+    一旦猜想被證明，這些定理將自動全部成立。
+  </p>
+</section>
+
+<!-- History -->
+<section id="history">
+  <div class="section-label">05 — 歷史脈絡</div>
+  <h2>165 年的探索之旅</h2>
+  <div class="sep"></div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-year">1748</div>
+      <div class="timeline-title">歐拉發現乘積公式</div>
+      <div class="timeline-desc">歐拉對實數 s 建立 Zeta 函數與質數的乘積公式，奠定基礎。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1859</div>
+      <div class="timeline-title">黎曼提出猜想</div>
+      <div class="timeline-desc">黎曼在一篇僅 8 頁的論文中，幾乎是附帶地提出了這個猜想。這是他畢生唯一一篇數論論文。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1896</div>
+      <div class="timeline-title">質數定理被證明</div>
+      <div class="timeline-desc">Hadamard 與 de la Vallée Poussin 獨立利用 Zeta 函數證明質數定理，間接驗證了猜想的部分意義。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1900</div>
+      <div class="timeline-title">希爾伯特 23 個問題</div>
+      <div class="timeline-desc">大衛·希爾伯特將黎曼猜想列入 20 世紀最重要的 23 個數學問題（第 8 題）。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1914</div>
+      <div class="timeline-title">哈代的部分進展</div>
+      <div class="timeline-desc">G.H. Hardy 證明臨界線上有無窮多個零點，但不能排除臨界帶內其他位置也有零點。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1972</div>
+      <div class="timeline-title">隨機矩陣的神秘聯繫</div>
+      <div class="timeline-desc">Montgomery 與 Dyson 的偶遇揭示：Zeta 零點的間距分佈，與量子混沌系統的能階分佈驚人吻合。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2000</div>
+      <div class="timeline-title">千禧年大獎問題</div>
+      <div class="timeline-desc">克雷數學研究所將黎曼猜想列為七大懸賞問題之一，獎金 100 萬美元。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2004</div>
+      <div class="timeline-title">電腦驗算突破</div>
+      <div class="timeline-desc">Wedeniwski 計畫驗算超過 10 億個非顯然零點，全部落在臨界線上。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">今天</div>
+      <div class="timeline-title">仍未解決</div>
+      <div class="timeline-desc">超過 10¹³ 個零點已被驗算，猜想依然未被證明或推翻。</div>
+    </div>
+  </div>
+</section>
+
+<!-- Impact -->
+<section id="impact">
+  <div class="section-label">06 — 重要性</div>
+  <h2>為何全世界都在等待答案？</h2>
+  <div class="sep"></div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="card-icon">🔐</div>
+      <h3>密碼學</h3>
+      <p>現代 RSA 加密依賴質數的難以預測性。理解質數分佈的精確規律，可能影響密碼系統的安全評估。</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚛️</div>
+      <h3>量子物理</h3>
+      <p>Zeta 零點與量子能階的神秘對應，暗示數論與物理定律之間存在深層連結，尚待揭示。</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧮</div>
+      <h3>演算法複雜度</h3>
+      <p>許多演算法的時間複雜度分析依賴黎曼猜想；它的成立與否直接影響計算理論的基礎。</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌌</div>
+      <h3>數學的統一</h3>
+      <p>猜想的證明（或推翻）將牽動代數、分析、幾何的深層聯繫，重塑整個數學版圖。</p>
+    </div>
+  </div>
+
+  <div class="prize-banner">
+    <span class="prize-amount">$1,000,000</span>
+    <div class="prize-label">克雷數學研究所懸賞獎金 · 至今無人領取</div>
+  </div>
+
+  <p>
+    黎曼猜想不只是一道數學題。它是人類理性探索的邊界——
+    一個我們能清楚陳述、能無限逼近驗證，
+    卻始終無法跨越的深淵。
+    它讓我們相信，宇宙中的質數並非雜亂無章，
+    而是遵循著某種<strong>至今仍隱藏著的深層和諧</strong>。
+  </p>
+
+  <div class="highlight-box" style="text-align: center;">
+    <em style="font-size: 1.1rem; color: var(--text);">
+      「如果我能從長眠中醒來，我第一個想問的問題就是：黎曼猜想被證明了嗎？」
+    </em>
+    <br><br>
+    <span style="color: var(--muted); font-size: 0.9rem;">— 大衛·希爾伯特</span>
+  </div>
+</section>
+
+<footer>
+  <p>黎曼猜想 · Riemann Hypothesis · 1859 — ?</p>
+  <p style="margin-top: 0.5rem; font-size: 0.75rem;">ζ(s) = 0 ⟹ Re(s) = ½</p>
+</footer>
+
+<script>
+// ── Hero Canvas: flowing complex plane particles ──
+(function() {
+  const canvas = document.getElementById('hero-canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H, particles = [], t = 0;
+
+  function resize() {
+    W = canvas.width = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Create particles
+  for (let i = 0; i < 120; i++) {
+    particles.push({
+      x: Math.random() * 1,
+      y: (Math.random() - 0.5) * 80,
+      speed: 0.002 + Math.random() * 0.004,
+      size: 1 + Math.random() * 2,
+      hue: 250 + Math.random() * 60
+    });
+  }
+
+  function zetaApprox(re, im) {
+    // Partial sum approximation
+    let sumRe = 0, sumIm = 0;
+    for (let n = 1; n <= 40; n++) {
+      const logN = Math.log(n);
+      const mag = Math.pow(n, -re);
+      const angle = -im * logN;
+      sumRe += mag * Math.cos(angle);
+      sumIm += mag * Math.sin(angle);
+    }
+    return { re: sumRe, im: sumIm };
+  }
+
+  function draw() {
+    ctx.fillStyle = 'rgba(10,10,15,0.15)';
+    ctx.fillRect(0, 0, W, H);
+
+    t += 0.003;
+
+    particles.forEach(p => {
+      p.y += p.speed * 60 * 0.016;
+      if (p.y > 80) p.y = -80;
+
+      const re = p.x;
+      const im = p.y + t * 8;
+      const z = zetaApprox(re, im);
+      const mag = Math.sqrt(z.re * z.re + z.im * z.im);
+      const alpha = Math.min(1, 0.6 / (mag + 0.1));
+
+      const screenX = (p.x * 0.6 + 0.2) * W;
+      const screenY = H / 2 + (p.y / 80) * H * 0.4;
+
+      ctx.beginPath();
+      ctx.arc(screenX, screenY, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, 80%, 70%, ${alpha * 0.7})`;
+      ctx.fill();
+
+      // Draw tiny line toward zeta output
+      const dx = z.re * 8;
+      const dy = z.im * 8;
+      ctx.beginPath();
+      ctx.moveTo(screenX, screenY);
+      ctx.lineTo(screenX + dx, screenY + dy);
+      ctx.strokeStyle = `hsla(${p.hue}, 80%, 70%, ${alpha * 0.3})`;
+      ctx.lineWidth = 0.5;
+      ctx.stroke();
+    });
+
+    // Draw critical line
+    const critX = 0.5 * 0.6 * W + 0.2 * W;
+    ctx.beginPath();
+    ctx.moveTo(critX, 0);
+    ctx.lineTo(critX, H);
+    ctx.strokeStyle = 'rgba(255,215,0,0.15)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Zeta Visualizer ──
+(function() {
+  const canvas = document.getElementById('zeta-canvas');
+  const ctx = canvas.getContext('2d');
+  const tRangeInput = document.getElementById('t-range');
+  const speedInput = document.getElementById('speed-range');
+  const tValLabel = document.getElementById('t-val');
+  const infoEl = document.getElementById('zeta-info');
+
+  let animT = 0, raf;
+
+  function zetaPartialSum(re, im, terms = 100) {
+    let sr = 0, si = 0;
+    for (let n = 1; n <= terms; n++) {
+      const mag = Math.pow(n, -re);
+      const angle = -im * Math.log(n);
+      sr += mag * Math.cos(angle);
+      si += mag * Math.sin(angle);
+    }
+    return { re: sr, im: si };
+  }
+
+  function draw() {
+    const W = canvas.offsetWidth;
+    const H = 320;
+    canvas.width = W;
+    canvas.height = H;
+
+    const tMax = parseFloat(tRangeInput.value);
+    tValLabel.textContent = `0 – ${tMax}`;
+
+    ctx.fillStyle = '#08080e';
+    ctx.fillRect(0, 0, W, H);
+
+    // Axes
+    const cx = W / 2, cy = H / 2;
+    const scale = Math.min(W, H) * 0.35;
+
+    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(W, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, H); ctx.stroke();
+
+    // Axis labels
+    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+    ctx.font = '11px Courier New';
+    ctx.fillText('Re(ζ)', W - 45, cy - 8);
+    ctx.fillText('Im(ζ)', cx + 8, 16);
+    ctx.fillText('0', cx + 4, cy - 4);
+
+    // Grid circles
+    [0.5, 1, 1.5].forEach(r => {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r * scale, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,0.2)';
+      ctx.fillText(r.toFixed(1), cx + r * scale + 4, cy + 12);
+    });
+
+    // Draw trace path
+    const steps = 400;
+    ctx.beginPath();
+    let first = true;
+
+    for (let i = 0; i <= steps; i++) {
+      const t = (i / steps) * tMax;
+      const z = zetaPartialSum(0.5, t);
+      const sx = cx + z.re * scale;
+      const sy = cy - z.im * scale;
+      const alpha = i / steps;
+      if (first) { ctx.moveTo(sx, sy); first = false; }
+      else ctx.lineTo(sx, sy);
+    }
+
+    const grad = ctx.createLinearGradient(0, 0, W, 0);
+    grad.addColorStop(0, 'rgba(124,106,247,0.3)');
+    grad.addColorStop(1, 'rgba(240,98,146,0.8)');
+    ctx.strokeStyle = grad;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Animated dot
+    const tCur = (animT % 1) * tMax;
+    const zCur = zetaPartialSum(0.5, tCur);
+    const dsx = cx + zCur.re * scale;
+    const dsy = cy - zCur.im * scale;
+
+    ctx.beginPath();
+    ctx.arc(dsx, dsy, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.shadowBlur = 12;
+    ctx.shadowColor = '#fff';
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    infoEl.textContent = `t = ${tCur.toFixed(2)}　Re(ζ) = ${zCur.re.toFixed(4)}　Im(ζ) = ${zCur.im.toFixed(4)}`;
+
+    const speed = parseFloat(speedInput.value) * 0.0004;
+    animT += speed;
+    raf = requestAnimationFrame(draw);
+  }
+
+  tRangeInput.addEventListener('input', () => {
+    cancelAnimationFrame(raf);
+    draw();
+  });
+
+  draw();
+})();
+
+// ── Zeros Canvas ──
+(function() {
+  const canvas = document.getElementById('zeros-canvas');
+  const ctx = canvas.getContext('2d');
+
+  function render() {
+    const W = canvas.offsetWidth;
+    const H = 200;
+    canvas.width = W;
+    canvas.height = H;
+
+    ctx.fillStyle = '#08080e';
+    ctx.fillRect(0, 0, W, H);
+
+    // Known non-trivial zeros (imaginary parts)
+    const zeros = [14.135, 21.022, 25.011, 30.425, 32.935, 37.586,
+                   40.919, 43.327, 48.005, 49.774, 52.970, 56.446,
+                   59.347, 60.832, 65.113, 67.079, 69.546, 72.067];
+
+    const tMax = 75, tMin = 0;
+    const scaleT = H * 0.85;
+    const reScale = W * 0.35;
+    const reCenter = W / 2;
+
+    // Critical strip background
+    const stripW = reScale * 1;
+    ctx.fillStyle = 'rgba(124,106,247,0.04)';
+    ctx.fillRect(reCenter - stripW / 2, 0, stripW, H);
+
+    // Critical line
+    ctx.beginPath();
+    ctx.moveTo(reCenter, 0);
+    ctx.lineTo(reCenter, H);
+    ctx.strokeStyle = 'rgba(255,215,0,0.6)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4, 4]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Label
+    ctx.fillStyle = 'rgba(255,215,0,0.7)';
+    ctx.font = '11px Courier New';
+    ctx.fillText('Re(s) = ½', reCenter + 6, 14);
+
+    // Strip labels
+    ctx.fillStyle = 'rgba(255,255,255,0.2)';
+    ctx.fillText('Re(s)=0', reCenter - stripW / 2 - 60, H / 2);
+    ctx.fillText('Re(s)=1', reCenter + stripW / 2 + 6, H / 2);
+
+    // Trivial zeros (left side, negative even integers — shown as gray)
+    [-2, -4, -6, -8].forEach((n, i) => {
+      const x = reCenter + (n / 10) * reScale;
+      const y = H / 2;
+      ctx.beginPath();
+      ctx.arc(x, y, 4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(150,150,150,0.5)';
+      ctx.fill();
+    });
+
+    // Non-trivial zeros
+    zeros.forEach((t, i) => {
+      const x = reCenter; // All on Re(s) = 1/2
+      const y = H * 0.92 - ((t - tMin) / (tMax - tMin)) * H * 0.85;
+
+      ctx.beginPath();
+      ctx.arc(x, y, 5, 0, Math.PI * 2);
+      const hue = 260 + i * 6;
+      ctx.fillStyle = `hsl(${hue}, 80%, 70%)`;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = `hsl(${hue}, 80%, 70%)`;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      if (W > 400) {
+        ctx.fillStyle = 'rgba(180,180,200,0.6)';
+        ctx.font = '9px Courier New';
+        ctx.fillText(`t=${t.toFixed(1)}`, x + 8, y + 3);
+      }
+    });
+
+    // Gray trivial label
+    ctx.fillStyle = 'rgba(150,150,150,0.5)';
+    ctx.font = '10px Courier New';
+    ctx.fillText('顯然零點', reCenter - reScale * 0.8, H / 2 - 12);
+  }
+
+  render();
+  window.addEventListener('resize', render);
+})();
+
+// Smooth scroll
+document.querySelectorAll('nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelector(a.getAttribute('href')).scrollIntoView({ behavior: 'smooth' });
+  });
+});
+</script>
+</body>
+</html>
