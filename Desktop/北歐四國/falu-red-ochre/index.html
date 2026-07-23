@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>木頭上的顏色政治：北歐木屋為何選擇法倫紅與赭石黃</title>
+<style>
+  :root{
+    --falu-red:#7b2d26;
+    --falu-red-deep:#5c1f1a;
+    --ochre:#c98a2b;
+    --ochre-deep:#a66f1e;
+    --cream:#f5efe2;
+    --paper:#fbf7ee;
+    --ink:#2b211c;
+    --ink-soft:#5a4d43;
+    --line:#e2d5bd;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:"Noto Serif TC","PMingLiU","Songti TC",serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.9;
+  }
+  .hero{
+    position:relative;
+    padding:7rem 1.5rem 5rem;
+    text-align:center;
+    background:
+      linear-gradient(180deg, rgba(43,33,28,.55), rgba(43,33,28,.75)),
+      url('images/red-farmhouse_20260723_151811.png') center/cover no-repeat;
+    color:#fbf3e4;
+  }
+  .hero .eyebrow{
+    letter-spacing:.35em;
+    font-size:.8rem;
+    text-transform:uppercase;
+    color:#f0d9b5;
+    margin-bottom:1.2rem;
+  }
+  .hero h1{
+    font-size:clamp(1.9rem, 4.5vw, 3.1rem);
+    margin:0 0 1rem;
+    font-weight:700;
+    text-shadow:0 2px 12px rgba(0,0,0,.4);
+  }
+  .hero p{
+    max-width:640px;
+    margin:0 auto;
+    font-size:1.05rem;
+    color:#f3e6cf;
+  }
+  .swatches{
+    display:flex;
+    justify-content:center;
+    gap:.6rem;
+    margin-top:2rem;
+  }
+  .swatch{
+    width:34px;height:34px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.6);
+    box-shadow:0 2px 6px rgba(0,0,0,.3);
+  }
+
+  .wrap{max-width:880px;margin:0 auto;padding:0 1.5rem;}
+
+  nav.toc{
+    background:var(--cream);
+    border-bottom:1px solid var(--line);
+    padding:1rem 0;
+    position:sticky; top:0; z-index:10;
+    overflow-x:auto;
+  }
+  nav.toc ul{
+    display:flex;
+    gap:1.6rem;
+    list-style:none;
+    margin:0; padding:0 1.5rem;
+    max-width:880px;
+    margin:0 auto;
+    white-space:nowrap;
+  }
+  nav.toc a{
+    color:var(--falu-red-deep);
+    text-decoration:none;
+    font-size:.9rem;
+    font-weight:600;
+    border-bottom:2px solid transparent;
+    padding-bottom:.3rem;
+  }
+  nav.toc a:hover{border-bottom-color:var(--ochre);}
+
+  section{padding:4.5rem 0;}
+  section.alt{background:var(--cream);}
+  section .wrap > .tag{
+    display:inline-block;
+    font-size:.78rem;
+    letter-spacing:.2em;
+    color:var(--ochre-deep);
+    font-weight:700;
+    margin-bottom:.8rem;
+  }
+  h2{
+    font-size:clamp(1.4rem,3vw,1.9rem);
+    color:var(--falu-red-deep);
+    margin:0 0 1.4rem;
+    border-left:6px solid var(--falu-red);
+    padding-left:.7rem;
+  }
+  h3{
+    color:var(--ochre-deep);
+    font-size:1.15rem;
+    margin:2rem 0 .8rem;
+  }
+  p{margin:0 0 1.1rem; color:var(--ink-soft);}
+  strong{color:var(--ink);}
+
+  figure{margin:2rem 0;}
+  figure img{
+    width:100%;
+    border-radius:10px;
+    display:block;
+    box-shadow:0 10px 30px rgba(43,33,28,.18);
+  }
+  figcaption{
+    font-size:.85rem;
+    color:#8a7a68;
+    text-align:center;
+    margin-top:.6rem;
+    font-style:italic;
+  }
+
+  .gallery{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1rem;
+    margin:2rem 0;
+  }
+  .gallery figure{margin:0;}
+  @media (max-width:640px){
+    .gallery{grid-template-columns:1fr;}
+  }
+
+  .callout{
+    background:linear-gradient(135deg, #fff, var(--cream));
+    border:1px solid var(--line);
+    border-left:5px solid var(--ochre);
+    border-radius:8px;
+    padding:1.3rem 1.5rem;
+    margin:1.8rem 0;
+  }
+  .callout p{margin:0; color:var(--ink);}
+  .callout .label{
+    font-weight:700;
+    color:var(--ochre-deep);
+    font-size:.85rem;
+    letter-spacing:.1em;
+    margin-bottom:.4rem;
+    display:block;
+  }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:1.8rem 0;
+    font-size:.95rem;
+  }
+  th,td{
+    padding:.8rem 1rem;
+    text-align:left;
+    border-bottom:1px solid var(--line);
+  }
+  th{
+    background:var(--falu-red);
+    color:#fbf3e4;
+    font-weight:600;
+  }
+  tr:nth-child(even){background:#00000005;}
+  .dot{
+    display:inline-block;
+    width:14px;height:14px;
+    border-radius:50%;
+    margin-right:.5rem;
+    vertical-align:middle;
+  }
+
+  .compare{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1.4rem;
+    margin:1.8rem 0;
+  }
+  @media (max-width:640px){.compare{grid-template-columns:1fr;}}
+  .compare .card{
+    border-radius:10px;
+    padding:1.3rem 1.4rem;
+    color:#fbf3e4;
+  }
+  .compare .card.red{background:linear-gradient(160deg, var(--falu-red), var(--falu-red-deep));}
+  .compare .card.yellow{background:linear-gradient(160deg, var(--ochre), var(--ochre-deep));}
+  .compare .card h4{margin:0 0 .6rem; font-size:1.1rem;}
+  .compare .card ul{margin:0; padding-left:1.2rem;}
+  .compare .card li{margin-bottom:.4rem; font-size:.92rem;}
+
+  footer{
+    padding:3rem 1.5rem 4rem;
+    text-align:center;
+    background:var(--ink);
+    color:#c9baa6;
+    font-size:.85rem;
+  }
+  footer a{color:#f0d9b5;}
+  .disclaimer{
+    max-width:880px;margin:0 auto 2rem;
+    font-size:.78rem;
+    color:#8a7a68;
+    background:var(--cream);
+    border:1px dashed var(--line);
+    border-radius:8px;
+    padding:1rem 1.3rem;
+  }
+
+  .music-toggle{
+    position:fixed;
+    right:1.4rem;
+    bottom:1.4rem;
+    z-index:100;
+    width:56px;height:56px;
+    border-radius:50%;
+    border:none;
+    background:var(--falu-red-deep);
+    color:#f5efe2;
+    font-size:1.4rem;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(43,33,28,.35);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .2s ease, background .2s ease;
+  }
+  .music-toggle:hover{transform:scale(1.06); background:var(--ochre-deep);}
+  .music-toggle.playing{animation:pulse 2.4s ease-in-out infinite;}
+  @keyframes pulse{
+    0%,100%{box-shadow:0 6px 18px rgba(43,33,28,.35);}
+    50%{box-shadow:0 6px 22px rgba(201,138,43,.55);}
+  }
+  .music-hint{
+    position:fixed;
+    right:1.4rem;
+    bottom:5.4rem;
+    z-index:100;
+    background:var(--ink);
+    color:#f0e2c8;
+    font-size:.75rem;
+    padding:.4rem .7rem;
+    border-radius:6px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .3s ease;
+    white-space:nowrap;
+  }
+  .music-hint.show{opacity:.92;}
+</style>
+</head>
+<body>
+
+<audio id="bgm" src="frozen-fjords.mp3" loop preload="none"></audio>
+<div class="music-hint" id="musicHint">播放背景音樂：Frozen Fjords</div>
+<button class="music-toggle" id="musicToggle" aria-label="播放或暫停背景音樂" title="播放／暫停背景音樂">♪</button>
+
+<div class="hero">
+  <div class="eyebrow">FALU RÖDFÄRG &amp; OCHRE · 北歐建築色彩研究</div>
+  <h1>木頭上的顏色政治<br>北歐木屋為何是「法倫紅」與「赭石黃」</h1>
+  <p>從瑞典法倫銅礦的礦渣，到挪威峽灣邊的漁村，再到貴族莊園模仿石造建築的赭石黃立面——這是一段關於化學、經濟史與社會階層如何被塗在木牆上的故事。</p>
+  <div class="swatches">
+    <div class="swatch" style="background:#7b2d26"></div>
+    <div class="swatch" style="background:#c98a2b"></div>
+    <div class="swatch" style="background:#f5efe2"></div>
+    <div class="swatch" style="background:#8a7a68"></div>
+  </div>
+</div>
+
+<nav class="toc">
+  <ul>
+    <li><a href="#intro">一眼認出北歐</a></li>
+    <li><a href="#mine">法倫銅礦的意外發明</a></li>
+    <li><a href="#chemistry">為什麼耐用</a></li>
+    <li><a href="#status">從奢侈品到平民色</a></li>
+    <li><a href="#ochre">赭石黃與假石頭</a></li>
+    <li><a href="#hierarchy">顏色階層表</a></li>
+    <li><a href="#regions">各國差異</a></li>
+    <li><a href="#today">今日的傳承</a></li>
+  </ul>
+</nav>
+
+<div class="wrap disclaimer" style="margin-top:2rem;">
+  說明：本頁文字為歷史與工藝背景研究整理；文中插圖為 AI 生成之示意圖（用於呈現場景與氛圍），並非特定地點的實際歷史照片。
+</div>
+
+<section id="intro">
+  <div class="wrap">
+    <span class="tag">01 · 為什麼會好奇</span>
+    <h2>只要看到紅色木屋，就知道到了北歐</h2>
+    <p>搭火車穿越瑞典達拉納（Dalarna）鄉間，或是沿著挪威峽灣開車，會發現一個奇特的現象：無論是農舍、穀倉、船屋還是漁村小屋，牆面幾乎都漆成同一種深沉的磚紅色，搭配白色的門窗邊框。而稍微富裕一點的莊園、牧師公館或市政建築，牆面則換成溫暖的赭石黃，同樣配上白色線腳。</p>
+    <p>這不是巧合，也不是單純的審美偏好。這兩種顏色——瑞典語稱為 <strong>falu rödfärg（法倫紅／法倫紅色漆）</strong>與 <strong>gul oljefärg（赭石黃油漆）</strong>——背後牽涉一座銅礦、一場歐洲戰爭的軍費、木材防腐的化學原理，以及一套持續了三百年的社會階級視覺密碼。</p>
+    <figure>
+      <img src="images/fjord-village_20260723_151946.png" alt="挪威峽灣邊的紅色與黃色木屋村落">
+      <figcaption>典型的斯堪地那維亞峽灣村落：紅色為主、黃色點綴、白色收邊的三色配置</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="mine" class="alt">
+  <div class="wrap">
+    <span class="tag">02 · 起源</span>
+    <h2>法倫銅礦：一座礦坑意外生產出的顏料</h2>
+    <p>故事的起點是瑞典達拉納省的 <strong>法倫大銅山（Stora Kopparberget）</strong>。這座銅礦至少從西元 10 世紀就有開採紀錄，到了 17 世紀，它一度供應全歐洲近三分之二的銅產量，是瑞典王國在三十年戰爭期間得以維持龐大軍費的經濟命脈，被稱為「瑞典的國家寶庫」。</p>
+    <p>採銅過程會產生大量含有硫化鐵、氧化鐵與少量銅、鋅化合物的礦渣與廢石。工匠發現，把這些赤褐色的礦渣磨成粉末,加水煮沸、過濾雜質後,再混入亞麻仁油或黑麥麵糊做為黏合劑，就能調出一種顏色深沉、附著力極佳的塗料。文獻記載最早的使用紀錄約在 1590 年代，最初只用於礦區自己的建築物。</p>
+    <div class="callout">
+      <span class="label">冷知識</span>
+      <p>法倫紅顏料的紅色來自氧化鐵（赤鐵礦, hematite），而非染料；它本質上是一種「礦渣顏料」，等同於把採礦的副產物直接變成建材塗料，成本極低，這也是它日後能夠普及全國的關鍵原因。</p>
+    </div>
+    <figure>
+      <img src="images/falun-mine_20260723_145947.png" alt="法倫銅礦礦坑示意圖">
+      <figcaption>法倫大銅山礦區示意：紅褐色的礦渣正是法倫紅顏料的原料來源</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="chemistry">
+  <div class="wrap">
+    <span class="tag">03 · 實用主義</span>
+    <h2>為什麼木屋需要這種顏色，而不只是好看</h2>
+    <p>北歐氣候潮濕多雨、日夜溫差大，木造房屋最大的敵人是<strong>腐朽、真菌與蟲害</strong>。法倫紅塗料剛好同時解決了這幾個問題：</p>
+    <div class="compare">
+      <div class="card red">
+        <h4>法倫紅的三個實用優勢</h4>
+        <ul>
+          <li>顏料顆粒細緻，能滲入木材紋理與裂縫，形成一層阻擋雨水滲透的保護膜</li>
+          <li>殘留的微量銅、鋅化合物具有天然抗菌、抗真菌效果，延緩木材腐爛</li>
+          <li>深色塗層吸熱效果佳，有助於木材表面在潮濕氣候中較快乾燥</li>
+        </ul>
+      </div>
+      <div class="card yellow">
+        <h4>與純裝飾漆料的差異</h4>
+        <ul>
+          <li>不像現代乳膠漆會在木材表面形成密封膜，法倫紅讓木材仍可「呼吸」，減少內部潮氣累積</li>
+          <li>耐候性強，農舍和穀倉常常十幾二十年才需要重新粉刷一次</li>
+          <li>原料為在地礦渣，成本遠低於進口染料或礦物顏料</li>
+        </ul>
+      </div>
+    </div>
+    <p>換句話說，農民選擇法倫紅一開始未必是為了美觀，而是因為它是<strong>當時最便宜、又最耐用的木材防護方案</strong>。這個「意外的實用發明」後來才逐漸演變成一種文化符號。</p>
+    <figure>
+      <img src="images/pigment-closeup_20260723_151845.png" alt="法倫紅顏料粉末與油漆罐特寫">
+      <figcaption>研磨後的氧化鐵顏料，混合亞麻仁油後即成為傳統的法倫紅塗料</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="status" class="alt">
+  <div class="wrap">
+    <span class="tag">04 · 社會史</span>
+    <h2>從貴族才用得起的顏色，到全民農舍的標配</h2>
+    <p>在 17 世紀，紅色油漆其實是<strong>奢侈品</strong>。當時磚造與石造建築在斯堪地那維亞相當罕見——當地缺乏優質的建材黏土與燒磚所需的大量燃料，因此磚石建築幾乎只出現在教堂、城堡與貴族莊園。法倫紅的磚紅色調，恰好能讓木造房屋<strong>模仿磚造建築的外觀</strong>，於是最初只有富裕地主與神職人員負擔得起，用來彰顯身分地位。</p>
+    <p>隨著法倫銅礦在 17～18 世紀持續擴大生產，礦渣顏料的供應量大增、價格隨之下降。到了 18 世紀中葉之後，一般農民也開始買得起法倫紅，並迅速將自家農舍、穀倉、柵欄全部漆成同樣的顏色。原本象徵貴族身分的顏色，反而因為「人人都負擔得起」而變成了<strong>鄉村生活與農民身分的象徵</strong>——這個轉折相當微妙：它先是階級符號，後來又變成了全民共享的文化認同。</p>
+    <div class="callout">
+      <span class="label">文化迴響</span>
+      <p>19 世紀瑞典畫家卡爾．拉森（Carl Larsson）筆下溫馨的鄉村居家場景，牆面幾乎都是法倫紅，這些畫作進一步將法倫紅塑造成「典型瑞典」的視覺象徵，一路影響到今天的宜家家居配色與觀光宣傳照。</p>
+    </div>
+  </div>
+</section>
+
+<section id="ochre">
+  <div class="wrap">
+    <span class="tag">05 · 赭石黃</span>
+    <h2>赭石黃：偽裝成石材的「次一級尊貴」</h2>
+    <p>如果說法倫紅是模仿磚造建築，那麼<strong>赭石黃（yellow ochre）</strong>模仿的就是歐洲大陸貴族偏愛的<strong>石灰岩、砂岩與灰泥立面</strong>。18 世紀古斯塔夫時期（Gustavian era）的新古典主義風潮從法國、義大利傳入瑞典宮廷，貴族莊園開始流行以赭石黃搭配白色線腳、柱式與窗框，刻意營造出「彷彿是石材建築」的視覺效果——實際上牆體仍是木造，只是用顏色偽裝成更高級的建材。</p>
+    <p>赭石顏料本身是天然的含鐵黏土（限石, limonite），是人類最早使用的礦物顏料之一，取得成本比法倫紅的銅礦礦渣更高，加工也更費工，因此在色彩位階上，赭石黃長期被視為<strong>僅次於白色灰泥的「次高級」色彩</strong>，常見於教區牧師公館、地方官邸、富農莊園等具有一定社會地位的建築。</p>
+    <figure>
+      <img src="images/yellow-manor_20260723_151922.png" alt="赭石黃色的新古典主義莊園建築">
+      <figcaption>赭石黃搭配白色柱式與線腳，模仿石造莊園的外觀效果</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="hierarchy" class="alt">
+  <div class="wrap">
+    <span class="tag">06 · 色彩即階級</span>
+    <h2>一張色卡，讀懂當年的社會地位</h2>
+    <p>在 18～19 世紀的瑞典鄉村，只要看房子的顏色，大致就能猜出屋主的財力與社會地位。這套非正式但普遍被遵循的「色彩階層」大致如下：</p>
+    <table>
+      <tr><th>顏色</th><th>模仿的建材</th><th>典型使用者</th></tr>
+      <tr><td><span class="dot" style="background:#f5efe2;border:1px solid #ccc"></span>白色灰泥</td><td>石灰岩、大理石</td><td>教堂、城堡、頂級貴族莊園</td></tr>
+      <tr><td><span class="dot" style="background:#c98a2b"></span>赭石黃</td><td>砂岩、石造立面</td><td>牧師公館、地方官邸、富農莊園</td></tr>
+      <tr><td><span class="dot" style="background:#7b2d26"></span>法倫紅</td><td>磚造建築</td><td>一般農舍、穀倉、漁村住宅</td></tr>
+      <tr><td><span class="dot" style="background:#8a7a68"></span>灰色／無漆原木</td><td>（無模仿對象，任其風化）</td><td>貧困農戶、臨時工寮、附屬建物</td></tr>
+    </table>
+    <p>值得注意的是，這套階層並非法律規定，而是長期社會習慣與經濟能力自然形成的默契——但它確實強大到讓 21 世紀的遊客，仍能單憑牆面顏色，感受到某種「這裡曾經是誰住的地方」的線索。</p>
+    <figure>
+      <img src="images/color-hierarchy_20260723_152048.png" alt="白色、赭石黃、法倫紅、灰色木屋顏色階層示意圖">
+      <figcaption>色彩階層示意：白色最尊貴，其次赭石黃，法倫紅為平民農舍主色，未上漆灰木則代表最底層</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="regions">
+  <div class="wrap">
+    <span class="tag">07 · 地域差異</span>
+    <h2>瑞典、挪威、芬蘭，其實用的不是同一種紅</h2>
+    <p>雖然遊客常把整個北歐的紅色木屋都籠統稱為「法倫紅」，但仔細追究,各國的色彩傳統其實各有源頭：</p>
+    <h3>瑞典：正統法倫紅</h3>
+    <p>直接源自法倫銅礦礦渣，是這個色彩傳統的發源地，至今瑞典仍有工廠持續以接近傳統配方生產法倫紅塗料，並作為國家文化遺產的一部分受到保護與推廣。</p>
+    <h3>挪威：黑色柏油與後來引進的紅色</h3>
+    <p>挪威中世紀的木構教堂（stavkirke, 木板教堂）傳統上使用松焦油（tjære）塗刷防腐，顏色偏深棕黑色，而非紅色。法倫紅是在 18 世紀之後透過與瑞典的貿易往來才逐漸引入挪威農村，並與原本的黑色松焦油傳統並存，形成今日峽灣村落紅、黑、白、黃交錯的多彩景觀。</p>
+    <h3>芬蘭：自己的「湖沼礦石紅」</h3>
+    <p>芬蘭的紅色木屋顏料稱為 <strong>punamulta（字面意為「紅土」）</strong>，雖然化學成份同樣以氧化鐵為主、視覺效果與法倫紅相似，但原料並非來自銅礦，而是取自芬蘭境內湖泊與沼澤底部沉積的<strong>湖沼鐵礦（järvimalmi）</strong>，是芬蘭獨立發展出的在地版本，而非直接進口瑞典配方。</p>
+    <div class="callout">
+      <span class="label">研究提醒</span>
+      <p>因此嚴格來說，「法倫紅」是瑞典的專屬稱呼；挪威與芬蘭的紅色木屋雖然視覺相近、化學原理相通（都是氧化鐵防腐塗料），但屬於各自平行發展的地方傳統，用「法倫紅」一詞概括全北歐時，最好加註這層區別。</p>
+    </div>
+    <figure>
+      <img src="images/painting-process_20260723_152014.png" alt="工匠以傳統方式為木牆刷上法倫紅塗料">
+      <figcaption>傳統法倫紅施工方式：用寬刷將顏料直接刷入木紋，不需底漆</figcaption>
+    </figure>
+  </div>
+</section>
+
+<section id="today" class="alt">
+  <div class="wrap">
+    <span class="tag">08 · 今日</span>
+    <h2>當實用理由消失後，為什麼還在漆</h2>
+    <p>現代早已有更便宜、更防水的合成塗料，法倫紅原本的「省錢防腐」優勢其實已經不再是唯一考量，但瑞典、挪威、芬蘭的鄉村居民仍然持續選擇這兩種顏色重新粉刷自己的房子。原因已經從實用主義,轉變為<strong>文化認同與地景保護</strong>：</p>
+    <p>許多地區的建築保護法規甚至明文規定,歷史街區或鄉村保護區內的木造建築必須維持法倫紅或赭石黃的傳統色彩，不得任意更換為其他顏色，以維護整體地景的一致性與觀光價值。對當地人而言，這已經不只是一種塗料選擇，而是一種「這就是我們家鄉該有的樣子」的集體記憶與身分認同。</p>
+    <p>下次在瑞典鄉間或挪威峽灣看到成排的紅色木屋時，不妨想起：那抹深紅色裡，藏著一座曾經供應全歐洲銅礦的礦坑、一場三十年戰爭的軍費來源、木材防腐的化學智慧，以及三百年來關於「誰買得起什麼顏色」的社會史。</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    北歐木屋色彩研究筆記 · 文字整理自公開歷史與工藝背景資料 · 插圖為 AI 生成示意圖，僅供閱讀情境參考
+  </div>
+</footer>
+
+<script>
+  const bgm = document.getElementById('bgm');
+  const toggle = document.getElementById('musicToggle');
+  const hint = document.getElementById('musicHint');
+  let hintTimer = setTimeout(() => hint.classList.add('show'), 1200);
+  let hideTimer = setTimeout(() => hint.classList.remove('show'), 6000);
+
+  toggle.addEventListener('click', () => {
+    clearTimeout(hintTimer);
+    clearTimeout(hideTimer);
+    hint.classList.remove('show');
+    if (bgm.paused) {
+      bgm.volume = 0.55;
+      bgm.play();
+      toggle.textContent = '❚❚';
+      toggle.classList.add('playing');
+    } else {
+      bgm.pause();
+      toggle.textContent = '♪';
+      toggle.classList.remove('playing');
+    }
+  });
+</script>
+
+</body>
+</html>
