@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>診所線上約診系統</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif; background: #f0f4f8; min-height: 100vh; }
+
+.header { background: linear-gradient(135deg, #1a73e8, #0d47a1); color: white; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+.clinic-name { font-size: 0.85rem; opacity: 0.8; margin-top: 2px; }
+.header-btns { display: flex; gap: 10px; }
+.tab-btn { background: rgba(255,255,255,0.15); border: 1.5px solid rgba(255,255,255,0.4); color: white; padding: 7px 18px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: all 0.2s; }
+.tab-btn.active, .tab-btn:hover { background: white; color: #1a73e8; border-color: white; }
+
+.view { display: none; max-width: 960px; margin: 24px auto; padding: 0 16px; }
+.view.active { display: block; }
+
+.card { background: white; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 20px; }
+.card-title { font-size: 1.05rem; font-weight: 700; color: #1a73e8; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+
+/* Steps */
+.steps { display: flex; align-items: center; margin-bottom: 24px; }
+.step { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: #bbb; font-weight: 600; white-space: nowrap; }
+.step.active { color: #1a73e8; }
+.step.done { color: #34a853; }
+.step-num { width: 26px; height: 26px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 0.78rem; flex-shrink: 0; }
+.step-line { flex: 1; height: 2px; background: #e0e0e0; margin: 0 8px; min-width: 16px; }
+
+/* Calendar */
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.cal-nav button { background: #e8f0fe; border: none; color: #1a73e8; width: 36px; height: 36px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; transition: background 0.2s; }
+.cal-nav button:hover { background: #1a73e8; color: white; }
+.cal-month { font-size: 1.15rem; font-weight: 700; color: #333; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.cal-hd { text-align: center; font-size: 0.78rem; font-weight: 700; color: #888; padding: 4px 0; }
+.cal-cell { text-align: center; border-radius: 10px; font-size: 0.9rem; cursor: default; min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 6px 2px 4px; gap: 2px; transition: all 0.15s; }
+.cal-names { width: 100%; display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
+.cal-name { font-size: 0.55rem; color: #555; background: #f0f4ff; border-radius: 3px; padding: 1px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; line-height: 1.4; text-align: left; }
+.cal-name-more { font-size: 0.5rem; color: #999; text-align: center; }
+.cal-cell.empty { background: transparent; }
+.cal-cell.past .day-num { color: #ccc; }
+.day-num { font-weight: 600; color: #333; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; }
+.cal-cell.today .day-num { background: #1a73e8; color: white; }
+.weekend .day-num { color: #e53935; }
+.cal-cell.today.weekend .day-num { background: #e53935; color: white; }
+.cal-cell.has-slots { cursor: pointer; }
+.cal-cell.has-slots:hover { background: #e8f0fe; transform: scale(1.03); }
+.cal-cell.selected { background: #e8f0fe; outline: 2px solid #1a73e8; }
+.session-dots { display: flex; gap: 2px; flex-wrap: wrap; justify-content: center; }
+.sdot { font-size: 0.6rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; line-height: 1.4; }
+.sdot.morning { background: #fff3e0; color: #e65100; }
+.sdot.afternoon { background: #e8f5e9; color: #2e7d32; }
+.sdot.evening { background: #e8eaf6; color: #3949ab; }
+
+/* Session picker */
+.session-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 10px; }
+.session-card { border: 2px solid #e0e0e0; border-radius: 12px; padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.session-card:hover { border-color: #1a73e8; background: #f8fbff; }
+.session-card.selected { border-color: #1a73e8; background: #e8f0fe; }
+.session-card.disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+.session-icon { font-size: 1.8rem; margin-bottom: 4px; }
+.session-label { font-weight: 700; font-size: 0.95rem; color: #333; }
+.session-time { font-size: 0.78rem; color: #888; margin-top: 2px; }
+
+/* Form */
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #555; margin-bottom: 5px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; padding: 9px 13px; border: 1.5px solid #ddd; border-radius: 9px; font-size: 0.93rem; font-family: inherit; transition: border 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: #1a73e8; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 540px) { .form-row { grid-template-columns: 1fr; } .session-cards { grid-template-columns: 1fr; } }
+
+/* Treatment chip selector */
+.treat-selector { border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 14px; background: #fafafa; }
+.treat-cat { margin-bottom: 10px; display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.treat-cat-label { font-size: 0.78rem; font-weight: 800; color: #1a73e8; background: #e8f0fe; padding: 3px 9px; border-radius: 6px; white-space: nowrap; margin-top: 2px; flex-shrink: 0; }
+.treat-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+.chip { padding: 4px 11px; border-radius: 20px; border: 1.5px solid #ccc; background: white; color: #444; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 500; }
+.chip:hover { border-color: #1a73e8; color: #1a73e8; }
+.chip.active { background: #1a73e8; border-color: #1a73e8; color: white; font-weight: 700; }
+.treat-divider { border: none; border-top: 1.5px dashed #ddd; margin: 12px 0; }
+.tooth-selector { display: flex; flex-direction: column; gap: 6px; }
+.tooth-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.tooth-btn { padding: 5px 10px; border-radius: 8px; border: 1.5px solid #ccc; background: white; color: #444; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; font-family: inherit; font-weight: 600; min-width: 36px; text-align: center; }
+.tooth-btn:hover { border-color: #34a853; color: #34a853; }
+.tooth-btn.active { background: #34a853; border-color: #34a853; color: white; }
+.add-entry-btn { margin-top: 12px; width: 100%; padding: 9px; background: #1a73e8; color: white; border: none; border-radius: 9px; font-size: 0.92rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: background 0.2s; }
+.add-entry-btn:hover { background: #1558b0; }
+.treat-entries { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; min-height: 10px; }
+.treat-entry-tag { display: inline-flex; align-items: center; gap: 6px; background: #e8f0fe; border: 1.5px solid #1a73e8; border-radius: 20px; padding: 4px 6px 4px 12px; font-size: 0.82rem; color: #1a73e8; font-weight: 600; }
+.treat-entry-tag button { background: #1a73e8; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.treat-entry-tag button:hover { background: #c62828; }
+.del-btn { width: 28px; height: 28px; border-radius: 6px; border: none; background: #fce8e6; color: #c62828; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: background 0.15s; flex-shrink: 0; }
+.del-btn:hover { background: #e53935; color: white; }
+
+/* Buttons */
+.btn { padding: 11px 26px; border-radius: 9px; border: none; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: #1a73e8; color: white; }
+.btn-primary:hover { background: #1558b0; }
+.btn-danger { background: #e53935; color: white; }
+.btn-danger:hover { background: #b71c1c; }
+.btn-success { background: #34a853; color: white; }
+.btn-success:hover { background: #1e7e34; }
+.btn-sm { padding: 6px 14px; font-size: 0.82rem; border-radius: 7px; }
+.btn-outline { background: white; border: 1.5px solid #1a73e8; color: #1a73e8; }
+.btn-outline:hover { background: #e8f0fe; }
+
+/* Summary */
+.summary-box { background: #e8f0fe; border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; font-size: 0.9rem; color: #333; line-height: 1.9; }
+.summary-box b { color: #1a73e8; }
+
+.notice { background: #fff8e1; border-left: 4px solid #ffc107; border-radius: 8px; padding: 11px 14px; margin-bottom: 14px; font-size: 0.86rem; color: #555; line-height: 1.6; }
+
+/* Appointments */
+.appt-list { display: flex; flex-direction: column; gap: 10px; }
+.appt-item { border: 1.5px solid #e0e0e0; border-radius: 11px; padding: 12px 16px; transition: box-shadow 0.2s; }
+.appt-item:hover { box-shadow: 0 2px 10px rgba(0,0,0,0.09); }
+.appt-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.appt-name { font-weight: 700; font-size: 0.97rem; color: #333; }
+.appt-meta { font-size: 0.81rem; color: #666; margin-top: 3px; line-height: 1.7; }
+.appt-status { padding: 3px 11px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; white-space: nowrap; }
+.status-confirmed { background: #e6f4ea; color: #1e7e34; }
+.status-pending { background: #fff3e0; color: #e65100; }
+.status-cancelled { background: #fce8e6; color: #c62828; }
+.treat-display { margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e0e0e0; font-size: 0.81rem; color: #555; }
+.treat-tag { display: inline-block; background: #f0f4f8; border-radius: 5px; padding: 2px 8px; margin: 2px 3px 2px 0; font-size: 0.78rem; color: #444; }
+
+/* Admin */
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 680px) { .admin-grid { grid-template-columns: 1fr; } }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: white; border-radius: 12px; padding: 14px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+.stat-num { font-size: 1.8rem; font-weight: 800; color: #1a73e8; }
+.stat-label { font-size: 0.78rem; color: #888; margin-top: 2px; }
+
+/* Admin calendar */
+.admin-cal-cell { text-align: center; border-radius: 8px; padding: 4px 2px; min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; }
+.session-toggle-row { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; margin-top: 2px; }
+.stoggle { font-size: 0.58rem; font-weight: 700; padding: 1px 4px; border-radius: 4px; cursor: pointer; border: 1.5px solid transparent; line-height: 1.5; transition: all 0.15s; }
+.stoggle.on.morning { background: #fff3e0; color: #e65100; border-color: #ffb74d; }
+.stoggle.on.afternoon { background: #e8f5e9; color: #2e7d32; border-color: #81c784; }
+.stoggle.on.evening { background: #e8eaf6; color: #3949ab; border-color: #7986cb; }
+.stoggle.off { background: #f5f5f5; color: #bbb; border-color: #e0e0e0; }
+.stoggle:hover { opacity: 0.75; }
+
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.filter-row select, .filter-row input { padding: 7px 11px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 0.85rem; }
+
+.slot-list { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+.slot-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 11px; background: #f8f9fa; border-radius: 8px; font-size: 0.87rem; }
+
+.empty-hint { text-align: center; padding: 28px; color: #bbb; font-size: 0.92rem; }
+.login-wrap { max-width: 370px; margin: 60px auto; padding: 0 16px; }
+
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(80px); background: #333; color: white; padding: 11px 22px; border-radius: 30px; font-size: 0.9rem; z-index: 9999; transition: transform 0.3s; box-shadow: 0 4px 16px rgba(0,0,0,0.25); }
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.success { background: #34a853; }
+.toast.error { background: #e53935; }
+
+.legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: #666; }
+
+/* Mic button */
+.input-with-mic { display: flex; gap: 6px; align-items: stretch; }
+.input-with-mic input, .input-with-mic textarea { flex: 1; min-width: 0; }
+.mic-btn { flex-shrink: 0; width: 40px; border: 1.5px solid #ddd; border-radius: 9px; background: white; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; color: #666; }
+.mic-btn:hover { border-color: #1a73e8; background: #e8f0fe; color: #1a73e8; }
+.mic-btn.recording { background: #e53935; border-color: #e53935; color: white; animation: pulse 0.8s ease-in-out infinite alternate; }
+@keyframes pulse { from { opacity: 1; } to { opacity: 0.55; } }
+.mic-hint { font-size: 0.75rem; color: #aaa; margin-top: 3px; }
+
+/* Autocomplete */
+.ac-wrap { position: relative; }
+.ac-dropdown { position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1.5px solid #1a73e8; border-top: none; border-radius: 0 0 10px 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); z-index: 500; max-height: 240px; overflow-y: auto; display: none; }
+.ac-dropdown.open { display: block; }
+.ac-item { padding: 10px 14px; cursor: pointer; border-bottom: 1px solid #f0f0f0; display: flex; align-items: center; justify-content: space-between; gap: 10px; transition: background 0.15s; }
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover, .ac-item.focused { background: #e8f0fe; }
+.ac-name { font-weight: 700; font-size: 0.93rem; color: #333; }
+.ac-meta { font-size: 0.78rem; color: #888; }
+.ac-badge { font-size: 0.7rem; background: #e8f0fe; color: #1a73e8; padding: 2px 7px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+.ac-empty { padding: 12px 14px; color: #aaa; font-size: 0.85rem; text-align: center; }
+.returning-tag { display: inline-flex; align-items: center; gap: 4px; background: #e6f4ea; color: #1e7e34; border-radius: 6px; padding: 3px 9px; font-size: 0.78rem; font-weight: 700; margin-left: 6px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div style="font-size:1.3rem;font-weight:800;letter-spacing:1px">📅 線上約診系統</div>
+    <div class="clinic-name" id="headerClinicName">診所預約平台</div>
+  </div>
+  <div class="header-btns">
+    <button class="tab-btn active" onclick="switchView('patient')">患者預約</button>
+    <button class="tab-btn" onclick="switchView('admin')">診所管理</button>
+  </div>
+</div>
+
+<!-- ===== 患者端 ===== -->
+<div class="view active" id="view-patient">
+
+  <div class="steps">
+    <div class="step active" id="step1"><div class="step-num">1</div> 選擇日期</div>
+    <div class="step-line"></div>
+    <div class="step" id="step2"><div class="step-num">2</div> 選擇時段</div>
+    <div class="step-line"></div>
+    <div class="step" id="step3"><div class="step-num">3</div> 填寫資料</div>
+    <div class="step-line"></div>
+    <div class="step" id="step4"><div class="step-num">4</div> 完成預約</div>
+  </div>
+
+  <!-- 日曆 -->
+  <div class="card">
+    <div class="card-title">🗓 選擇看診日期</div>
+    <div class="cal-nav">
+      <button onclick="prevMonth()">‹</button>
+      <div class="cal-month" id="calMonth"></div>
+      <button onclick="nextMonth()">›</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="legend">
+      <div class="legend-item"><span class="sdot morning">早</span> 早診開放</div>
+      <div class="legend-item"><span class="sdot afternoon">午</span> 午診開放</div>
+      <div class="legend-item"><span class="sdot evening">晚</span> 晚診開放</div>
+    </div>
+  </div>
+
+  <!-- 時段選擇 -->
+  <div class="card" id="sessionCard" style="display:none">
+    <div class="card-title">🕐 選擇時段 — <span id="selectedDateLabel" style="color:#333;font-weight:600"></span></div>
+    <div class="session-cards" id="sessionGrid"></div>
+    <div style="margin-top:14px">
+      <button class="btn btn-outline btn-sm" onclick="clearDateSel()">← 重新選擇日期</button>
+    </div>
+  </div>
+
+  <!-- 填寫表單 -->
+  <div class="card" id="formCard" style="display:none">
+    <div class="card-title">📋 填寫預約資料</div>
+    <div class="summary-box" id="bookingSummary"></div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>患者姓名 * <span id="returningTag" class="returning-tag" style="display:none">↩ 舊患者已帶入資料</span></label>
+        <div class="ac-wrap">
+          <div class="input-with-mic">
+            <input type="text" id="patientName" placeholder="輸入姓名或點 🎤 語音輸入"
+              autocomplete="off"
+              oninput="acInput(this.value)"
+              onkeydown="acKeydown(event)"
+              onfocus="acInput(this.value)"
+              onblur="setTimeout(acClose,180)">
+            <button class="mic-btn" data-mic="patientName" onclick="startVoice('patientName')" type="button" title="語音輸入姓名">🎤</button>
+          </div>
+          <div class="ac-dropdown" id="acDropdown"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>聯絡電話 *</label>
+        <input type="tel" id="patientPhone" placeholder="例：0912-345-678">
+      </div>
+    </div>
+    <div class="form-group">
+      <label>主訴 / 備註</label>
+      <div class="input-with-mic">
+        <textarea id="patientNote" rows="2" placeholder="請簡述症狀或特殊需求（選填）"></textarea>
+        <button class="mic-btn" data-mic="patientNote" onclick="startVoice('patientNote')" type="button" title="語音輸入備註">🎤</button>
+      </div>
+    </div>
+
+    <!-- 療程項目 chip 選取 -->
+    <div class="form-group">
+      <label>當天預計治療項目 <span style="font-weight:400;color:#999">點選項目＋牙位後按「加入」，可多筆</span></label>
+      <div class="treat-selector">
+        <div id="chipCategories"></div>
+        <hr class="treat-divider">
+        <div class="tooth-selector">
+          <div class="tooth-row" id="toothQuadRow"></div>
+          <div class="tooth-row" id="toothNumRow"></div>
+        </div>
+        <button class="add-entry-btn" onclick="addTreatEntry()">＋ 加入</button>
+        <div class="treat-entries" id="treatEntries"></div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn btn-outline" onclick="clearSessionSel()">← 重新選擇時段</button>
+      <button class="btn btn-primary" onclick="submitBooking()">確認預約 →</button>
+    </div>
+  </div>
+
+  <!-- 成功 -->
+  <div class="card" id="successCard" style="display:none;text-align:center">
+    <div style="font-size:3.2rem;margin-bottom:10px">✅</div>
+    <div style="font-size:1.25rem;font-weight:800;color:#34a853;margin-bottom:8px">預約成功！</div>
+    <div class="summary-box" id="successSummary" style="text-align:left;margin:14px 0"></div>
+    <div class="notice">請記下預約資訊，如需取消請提前聯絡診所。</div>
+    <button class="btn btn-primary" onclick="resetBooking()" style="margin-top:8px">再次預約</button>
+  </div>
+
+  <!-- 當日/所選日期約診清單 -->
+  <div class="card" id="dayApptCard" style="display:none;margin-top:12px">
+    <div class="card-title" id="dayApptTitle">📋 當日約診</div>
+    <div id="dayApptList"></div>
+  </div>
+
+</div>
+
+<!-- ===== 管理端 ===== -->
+<div class="view" id="view-admin">
+  <div class="login-wrap" id="adminLogin">
+    <div class="card">
+      <div class="card-title" style="justify-content:center">🔐 診所管理員登入</div>
+      <div class="form-group">
+        <label>管理員密碼</label>
+        <input type="password" id="adminPwd" placeholder="請輸入密碼" onkeydown="if(event.key==='Enter')doAdminLogin()">
+      </div>
+      <button class="btn btn-primary" style="width:100%" onclick="doAdminLogin()">登入</button>
+      <div style="margin-top:10px;font-size:0.78rem;color:#aaa;text-align:center">預設密碼：clinic123</div>
+    </div>
+  </div>
+
+  <div id="adminPanel" style="display:none">
+
+    <!-- 診所設定 -->
+    <div class="card">
+      <div class="card-title">🏥 診所設定</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>診所名稱</label>
+          <input type="text" id="clinicName" placeholder="例：健康診所">
+        </div>
+        <div class="form-group">
+          <label>管理員密碼（留空不更改）</label>
+          <input type="password" id="newPwd" placeholder="輸入新密碼">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>科別設定（逗號分隔）</label>
+          <input type="text" id="deptInput" placeholder="例：一般門診,內科,兒科,婦科">
+        </div>
+        <div class="form-group">
+          <label>各時段名稱（早診 / 午診 / 晚診）</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <input type="text" id="nameM" placeholder="早診">
+            <input type="text" id="nameA" placeholder="午診">
+            <input type="text" id="nameE" placeholder="晚診">
+          </div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>各時段時間說明（早 / 午 / 晚）</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px">
+            <input type="text" id="timeM" placeholder="09:00–12:00">
+            <input type="text" id="timeA" placeholder="14:00–17:00">
+            <input type="text" id="timeE" placeholder="18:00–21:00">
+          </div>
+        </div>
+        <div class="form-group" style="display:flex;align-items:flex-end">
+          <button class="btn btn-success btn-sm" onclick="saveSettings()">儲存設定</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 治療分類管理 -->
+    <div class="card">
+      <div class="card-title">🦷 治療分類管理</div>
+      <div style="font-size:0.82rem;color:#888;margin-bottom:10px">
+        每行一個分類，格式：<b>分類名稱: 項目1, 項目2, 項目3</b><br>
+        例：<code>根管: RCF, Endo, P1, P2, 裝P</code>
+      </div>
+      <textarea id="treatItemsInput" rows="10" style="width:100%;border:1.5px solid #ddd;border-radius:9px;padding:10px 13px;font-size:0.88rem;font-family:inherit;line-height:2;resize:vertical;font-variant-numeric:tabular-nums"></textarea>
+      <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-success btn-sm" onclick="saveTreatItems()">儲存分類</button>
+        <button class="btn btn-outline btn-sm" onclick="resetTreatItems()">還原預設</button>
+      </div>
+    </div>
+
+    <!-- 統計 -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">總預約數</div></div>
+      <div class="stat-card"><div class="stat-num" id="statToday">0</div><div class="stat-label">今日預約</div></div>
+      <div class="stat-card"><div class="stat-num" id="statPending">0</div><div class="stat-label">待確認</div></div>
+    </div>
+
+    <div class="admin-grid">
+      <!-- 左欄：日曆管理 -->
+      <div>
+        <div class="card">
+          <div class="card-title">📅 可約診日期管理</div>
+          <div style="font-size:0.82rem;color:#888;margin-bottom:10px">點擊各日期下方的早／午／晚按鈕來開放或關閉時段</div>
+          <div class="cal-nav">
+            <button onclick="prevAdminMonth()">‹</button>
+            <div class="cal-month" id="adminCalMonth"></div>
+            <button onclick="nextAdminMonth()">›</button>
+          </div>
+          <div class="cal-grid" id="adminCalGrid"></div>
+          <div style="margin-top:14px">
+            <div style="font-size:0.78rem;font-weight:700;color:#888;margin-bottom:6px">📋 套用標準班表</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary btn-sm" onclick="applyStandardSchedule()">套用本月標準班表</button>
+              <button class="btn btn-danger btn-sm" onclick="clearMonthSchedule()">清除本月全部時段</button>
+            </div>
+            <div style="margin-top:6px;font-size:0.75rem;color:#aaa;line-height:1.7">
+              一三五：早診＋午診　｜　二四：午診＋晚診<br>
+              週日：不排班　｜　週六：請手動機動調整
+            </div>
+          </div>
+          <div style="margin-top:10px">
+            <div style="font-size:0.78rem;font-weight:700;color:#888;margin-bottom:6px">🔧 週六機動開關</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-outline btn-sm" onclick="toggleSaturdays(true)">本月週六全開</button>
+              <button class="btn btn-outline btn-sm" onclick="toggleSaturdays(false)">本月週六全關</button>
+              <button class="btn btn-outline btn-sm" onclick="toggleAlternateSaturdays()">本月隔週六</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 右欄：預約清單 -->
+      <div>
+        <div class="card">
+          <div class="card-title">👥 預約清單</div>
+          <div class="filter-row">
+            <input type="date" id="filterDate" onchange="renderAppts()">
+            <select id="filterSession" onchange="renderAppts()">
+              <option value="">全部時段</option>
+              <option value="morning">早診</option>
+              <option value="afternoon">午診</option>
+              <option value="evening">晚診</option>
+            </select>
+            <select id="filterStatus" onchange="renderAppts()">
+              <option value="">全部狀態</option>
+              <option value="confirmed">已確認</option>
+              <option value="pending">待確認</option>
+              <option value="cancelled">已取消</option>
+            </select>
+            <button class="btn btn-outline btn-sm" onclick="clearFilters()">清除</button>
+          </div>
+          <div class="appt-list" id="apptList"></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:right;margin-bottom:32px">
+      <button class="btn btn-outline btn-sm" onclick="doAdminLogout()">登出</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== 資料 =====
+const KEY = 'clinic_v2';
+const SESSION_KEYS = ['morning','afternoon','evening'];
+
+// 標準班表規則：回傳該星期幾應開放的 session 物件
+// 0=日 1=一 2=二 3=三 4=四 5=五 6=六
+function standardSessions(dow) {
+  if (dow === 0) return null;                              // 週日：不看診
+  if (dow === 1 || dow === 3 || dow === 5)                 // 週一三五：早+午
+    return { morning: true, afternoon: true, evening: false };
+  if (dow === 2 || dow === 4)                              // 週二四：午+晚
+    return { morning: false, afternoon: true, evening: true };
+  return null;                                             // 週六：不預設，機動調整
+}
+
+function defaultData() {
+  // 預設開放今天起 30 天，依標準班表規則（週六不預設）
+  const schedule = {};
+  const base = new Date(); base.setHours(0,0,0,0);
+  for (let i = 0; i < 30; i++) {
+    const d = new Date(base); d.setDate(base.getDate() + i);
+    const sess = standardSessions(d.getDay());
+    if (sess) schedule[fmtDate(d)] = sess;
+  }
+  return {
+    clinicName: '大原牙醫診所',
+    adminPwd: 'clinic123',
+    depts: ['一般牙科','牙周科','矯正科','口腔外科','兒童牙科','贋復科'],
+    treatCategories: [
+      { name: '洗牙',   items: ['半年','三個月','DM','H','SC','口乾SC','懷孕SC','局部SC','牙菌斑照護'] },
+      { name: '根管',   items: ['RCF','Endo','P1','P2','裝P','重新RCF'] },
+      { name: '補牙假牙', items: ['OD','印模','重印','咬高度','做臨時','裝牙','裝活動','釘子','拆釘子','裝二階'] },
+      { name: '拔牙手術', items: ['拔牙','簡單拔牙','複雜拔牙','拆牙','牙週緊急處置','骨再生手術','口內切開','PRF','拆骨釘'] },
+      { name: '矯正',   items: ['換線','拆矯正','裝維持器','印維持器','檢擴張','檢查活動矯正'] },
+      { name: '檢查影像', items: ['拍X光','拍CT','拍數位X光','拍全口','拆線','檢查','問矯正','非特定','定檢回診'] }
+    ],
+    sessions: {
+      morning:   { name: '早診', time: '09:00–12:00' },
+      afternoon: { name: '午診', time: '14:00–17:00' },
+      evening:   { name: '晚診', time: '18:00–21:00' }
+    },
+    schedule,
+    appointments: []
+  };
+}
+
+function load() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || defaultData(); } catch { return defaultData(); }
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(data)); }
+
+let data = load();
+
+// ===== 狀態 =====
+let calY, calM;
+let adminCalY, adminCalM;
+let selDate = null, selSession = null;
+
+const today = new Date(); today.setHours(0,0,0,0);
+const todayStr = () => fmtDate(today);
+
+function fmtDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ===== 初始化 =====
+function init() {
+  calY = today.getFullYear(); calM = today.getMonth();
+  adminCalY = today.getFullYear(); adminCalM = today.getMonth();
+  renderCal(); updateHeaderName();
+}
+function updateHeaderName() {
+  document.getElementById('headerClinicName').textContent = data.clinicName || '診所預約平台';
+}
+
+// ===== 視圖切換 =====
+function switchView(v) {
+  document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(e => e.classList.remove('active'));
+  document.getElementById('view-' + v).classList.add('active');
+  event.target.classList.add('active');
+  if (v === 'admin') renderAdminView();
+}
+
+// ===== 患者日曆 =====
+const WK = ['日','一','二','三','四','五','六'];
+const MO = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const SESSION_ICON = { morning: '🌅', afternoon: '☀️', evening: '🌙' };
+
+function renderCal() {
+  document.getElementById('calMonth').textContent = `${calY} 年 ${MO[calM]}`;
+  const g = document.getElementById('calGrid');
+  g.innerHTML = '';
+  WK.forEach(w => { const h = document.createElement('div'); h.className='cal-hd'; h.textContent=w; g.appendChild(h); });
+
+  const firstDay = new Date(calY, calM, 1).getDay();
+  const days = new Date(calY, calM+1, 0).getDate();
+
+  for (let i = 0; i < firstDay; i++) {
+    const e = document.createElement('div'); e.className='cal-cell empty'; g.appendChild(e);
+  }
+  for (let d = 1; d <= days; d++) {
+    const ds = `${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cell = document.createElement('div');
+    cell.className = 'cal-cell';
+
+    const dObj = new Date(calY, calM, d);
+    const isWE = dObj.getDay()===0 || dObj.getDay()===6;
+    const isPast = dObj < today;
+    const isToday = ds === todayStr();
+    if (isWE) cell.classList.add('weekend');
+
+    const num = document.createElement('div');
+    num.className = 'day-num'; num.textContent = d;
+    if (isToday) cell.classList.add('today');
+    cell.appendChild(num);
+
+    const sch = data.schedule[ds] || {};
+    const avail = SESSION_KEYS.filter(s => sch[s]);
+
+    if (!isPast && avail.length > 0) {
+      cell.classList.add('has-slots');
+      if (ds === selDate) cell.classList.add('selected');
+
+      const dots = document.createElement('div');
+      dots.className = 'session-dots';
+      avail.forEach(s => {
+        const sp = document.createElement('span');
+        sp.className = `sdot ${s}`;
+        sp.textContent = data.sessions[s]?.name?.[0] || '?';
+        dots.appendChild(sp);
+      });
+      cell.appendChild(dots);
+      cell.onclick = () => selectDate(ds);
+
+      // 顯示當日已約診姓名
+      const dayAppts = data.appointments.filter(a => a.date === ds && a.status !== 'cancelled');
+      if (dayAppts.length > 0) {
+        const namesDiv = document.createElement('div');
+        namesDiv.className = 'cal-names';
+        const show = dayAppts.slice(0, 3);
+        show.forEach(a => {
+          const n = document.createElement('div');
+          n.className = 'cal-name';
+          n.textContent = a.name;
+          namesDiv.appendChild(n);
+        });
+        if (dayAppts.length > 3) {
+          const more = document.createElement('div');
+          more.className = 'cal-name-more';
+          more.textContent = `+${dayAppts.length - 3}`;
+          namesDiv.appendChild(more);
+        }
+        cell.appendChild(namesDiv);
+      }
+    }
+    if (isPast) { num.style.color='#ccc'; }
+    g.appendChild(cell);
+  }
+}
+function prevMonth() { calM--; if(calM<0){calM=11;calY--;} renderCal(); }
+function nextMonth() { calM++; if(calM>11){calM=0;calY++;} renderCal(); }
+
+function renderDayAppts(ds) {
+  const card = document.getElementById('dayApptCard');
+  const list = document.getElementById('dayApptList');
+  const title = document.getElementById('dayApptTitle');
+  const appts = data.appointments
+    .filter(a => a.date === ds && a.status !== 'cancelled')
+    .sort((a, b) => {
+      const order = { morning: 0, afternoon: 1, evening: 2 };
+      return (order[a.session] || 0) - (order[b.session] || 0);
+    });
+  if (appts.length === 0) { card.style.display = 'none'; return; }
+  title.textContent = `📋 ${ds} 約診（共 ${appts.length} 位）`;
+  list.innerHTML = appts.map(a => {
+    const treats = a.treatments?.length ? a.treatments.map(t => t.text).join('、') : '';
+    return `<div class="appt-card">
+      <div class="appt-name">${a.name}<span style="font-size:0.78rem;color:#888;margin-left:8px">${SESSION_ICON[a.session] || ''} ${a.sessionName || ''}</span></div>
+      <div class="appt-meta">${a.phone ? '📞 ' + a.phone : ''}${treats ? '　' + treats : ''}${a.note ? '<br>📝 ' + a.note : ''}</div>
+    </div>`;
+  }).join('');
+  card.style.display = 'block';
+}
+
+function selectDate(ds) {
+  selDate = ds; selSession = null;
+  renderCal();
+  showSessions(ds);
+  renderDayAppts(ds);
+  setStep(2);
+}
+
+function showSessions(ds) {
+  document.getElementById('selectedDateLabel').textContent = ds;
+  const sch = data.schedule[ds] || {};
+  const grid = document.getElementById('sessionGrid');
+  grid.innerHTML = '';
+  SESSION_KEYS.forEach(s => {
+    const on = sch[s];
+    const sInfo = data.sessions[s] || {};
+    const card = document.createElement('div');
+    card.className = 'session-card' + (on ? '' : ' disabled');
+    card.innerHTML = `<div class="session-icon">${SESSION_ICON[s]}</div>
+      <div class="session-label">${sInfo.name || s}</div>
+      <div class="session-time">${sInfo.time || ''}</div>`;
+    if (on) card.onclick = () => selectSession(s, card);
+    grid.appendChild(card);
+  });
+  document.getElementById('sessionCard').style.display='block';
+  document.getElementById('formCard').style.display='none';
+  document.getElementById('successCard').style.display='none';
+  document.getElementById('sessionCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function selectSession(s, card) {
+  selSession = s;
+  document.querySelectorAll('.session-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  showForm();
+  setStep(3);
+}
+
+function showForm() {
+  const sInfo = data.sessions[selSession] || {};
+  document.getElementById('bookingSummary').innerHTML =
+    `預約日期：<b>${selDate}</b>　時段：<b>${SESSION_ICON[selSession]} ${sInfo.name || selSession}（${sInfo.time||''}）</b>`;
+
+
+  initTreatSelector();
+  clearReturningTag();
+  document.getElementById('formCard').style.display='block';
+  document.getElementById('successCard').style.display='none';
+  document.getElementById('formCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function clearDateSel() {
+  selDate=null; selSession=null;
+  document.getElementById('sessionCard').style.display='none';
+  document.getElementById('formCard').style.display='none';
+  setStep(1); renderCal();
+}
+function clearSessionSel() {
+  selSession=null;
+  document.getElementById('formCard').style.display='none';
+  document.querySelectorAll('.session-card').forEach(c=>c.classList.remove('selected'));
+  setStep(2);
+  document.getElementById('sessionCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function setStep(n) {
+  for(let i=1;i<=4;i++){
+    const el=document.getElementById('step'+i);
+    el.classList.remove('active','done');
+    if(i<n) el.classList.add('done');
+    else if(i===n) el.classList.add('active');
+  }
+}
+
+// ===== Chip 療程選取 =====
+const TOOTH_QUADS = ['左上','左下','右上','右下','全口','上顎','下顎'];
+const TOOTH_NUMS  = ['1','2','3','4','5','6','7','8','9','X'];
+
+let selQuad = '', selNum = '';
+let treatList = [];   // [{ text }]
+
+function initTreatSelector() {
+  selQuad = ''; selNum = '';
+  treatList = [];
+  renderChipCategories();
+  renderToothSelector();
+  renderTreatEntries();
+}
+
+function renderChipCategories() {
+  const cats = data.treatCategories || [];
+  const wrap = document.getElementById('chipCategories');
+  wrap.innerHTML = '';
+  cats.forEach(cat => {
+    const row = document.createElement('div');
+    row.className = 'treat-cat';
+    const label = document.createElement('span');
+    label.className = 'treat-cat-label';
+    label.textContent = cat.name;
+    const chips = document.createElement('div');
+    chips.className = 'treat-chips';
+    cat.items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.className = 'chip';
+      btn.type = 'button';
+      btn.textContent = item;
+      btn.onclick = () => { btn.classList.toggle('active'); };
+      chips.appendChild(btn);
+    });
+    row.appendChild(label);
+    row.appendChild(chips);
+    wrap.appendChild(row);
+  });
+}
+
+function renderToothSelector() {
+  const qRow = document.getElementById('toothQuadRow');
+  const nRow = document.getElementById('toothNumRow');
+  qRow.innerHTML = '';
+  nRow.innerHTML = '';
+  TOOTH_QUADS.forEach(q => {
+    const btn = document.createElement('button');
+    btn.className = 'tooth-btn' + (selQuad === q ? ' active' : '');
+    btn.type = 'button';
+    btn.textContent = q;
+    btn.onclick = () => { selQuad = selQuad === q ? '' : q; renderToothSelector(); };
+    qRow.appendChild(btn);
+  });
+  TOOTH_NUMS.forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'tooth-btn' + (selNum === n ? ' active' : '');
+    btn.type = 'button';
+    btn.textContent = n;
+    btn.onclick = () => { selNum = selNum === n ? '' : n; renderToothSelector(); };
+    nRow.appendChild(btn);
+  });
+}
+
+function addTreatEntry() {
+  const activeChips = [...document.querySelectorAll('#chipCategories .chip.active')]
+    .map(b => b.textContent);
+  if (!activeChips.length && !selQuad) {
+    showToast('請先選擇治療項目或牙位', 'error'); return;
+  }
+  const tooth = (selQuad + selNum).trim();
+  const text  = [tooth, ...activeChips].filter(Boolean).join(' ');
+  treatList.push({ text });
+  // 清除 chip 選取
+  document.querySelectorAll('#chipCategories .chip.active').forEach(b => b.classList.remove('active'));
+  selQuad = ''; selNum = '';
+  renderToothSelector();
+  renderTreatEntries();
+}
+
+function removeTreatEntry(idx) {
+  treatList.splice(idx, 1);
+  renderTreatEntries();
+}
+
+function renderTreatEntries() {
+  const wrap = document.getElementById('treatEntries');
+  wrap.innerHTML = '';
+  treatList.forEach((e, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'treat-entry-tag';
+    tag.innerHTML = `${e.text}<button type="button" onclick="removeTreatEntry(${i})">✕</button>`;
+    wrap.appendChild(tag);
+  });
+  if (!treatList.length) {
+    wrap.innerHTML = '<span style="font-size:0.8rem;color:#bbb">尚未加入任何項目</span>';
+  }
+}
+
+function getTreatRows() { return treatList; }
+
+// ===== 送出預約 =====
+function submitBooking() {
+  const name = document.getElementById('patientName').value.trim();
+  const phone = document.getElementById('patientPhone').value.trim();
+  if (!name) { showToast('請填寫患者姓名', 'error'); return; }
+  if (!phone) { showToast('請填寫聯絡電話', 'error'); return; }
+  if (!selDate || !selSession) { showToast('請選擇日期與時段', 'error'); return; }
+
+  const sInfo = data.sessions[selSession] || {};
+  const appt = {
+    id: Date.now().toString(36),
+    date: selDate,
+    session: selSession,
+    sessionName: sInfo.name || selSession,
+    name, phone,
+    note: document.getElementById('patientNote').value.trim(),
+    treatments: getTreatRows(),
+    status: 'pending',
+    createdAt: new Date().toISOString()
+  };
+
+  data.appointments.push(appt);
+  save();
+
+  const treatHtml = appt.treatments.length
+    ? appt.treatments.map(t => t.text).join('、')
+    : '（未填寫）';
+
+  document.getElementById('successSummary').innerHTML =
+    `預約編號：<b>${appt.id.toUpperCase()}</b><br>` +
+    `患者姓名：<b>${name}</b><br>` +
+    `看診日期：<b>${selDate}</b><br>` +
+    `看診時段：<b>${SESSION_ICON[selSession]} ${appt.sessionName}</b><br>` +
+    `聯絡電話：<b>${phone}</b><br>` +
+    `預計治療：<b>${treatHtml}</b>`;
+
+  document.getElementById('formCard').style.display='none';
+  document.getElementById('successCard').style.display='block';
+  document.getElementById('successCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+  renderDayAppts(selDate);
+  setStep(4);
+  showToast('預約成功！', 'success');
+}
+
+function resetBooking() {
+  selDate=null; selSession=null;
+  ['patientName','patientPhone','patientNote'].forEach(id => document.getElementById(id).value='');
+  treatList = []; selQuad = ''; selNum = '';
+  clearReturningTag(); acClose();
+  document.getElementById('sessionCard').style.display='none';
+  document.getElementById('formCard').style.display='none';
+  document.getElementById('successCard').style.display='none';
+  setStep(1); renderCal();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ===== 管理端 =====
+let isAdmin = false;
+
+function doAdminLogin() {
+  if (document.getElementById('adminPwd').value === data.adminPwd) {
+    isAdmin = true;
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    renderAdminView();
+  } else {
+    showToast('密碼錯誤', 'error');
+  }
+}
+function doAdminLogout() {
+  isAdmin=false;
+  document.getElementById('adminLogin').style.display='block';
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('adminPwd').value='';
+}
+
+function renderAdminView() {
+  if (!isAdmin) return;
+  data = load();
+  const s = data.sessions;
+  document.getElementById('clinicName').value = data.clinicName||'';
+  document.getElementById('deptInput').value = (data.depts||[]).join(',');
+  document.getElementById('nameM').value = s.morning?.name||'早診';
+  document.getElementById('nameA').value = s.afternoon?.name||'午診';
+  document.getElementById('nameE').value = s.evening?.name||'晚診';
+  document.getElementById('timeM').value = s.morning?.time||'09:00–12:00';
+  document.getElementById('timeA').value = s.afternoon?.time||'14:00–17:00';
+  document.getElementById('timeE').value = s.evening?.time||'18:00–21:00';
+  document.getElementById('treatItemsInput').value = (data.treatCategories || [])
+    .map(c => `${c.name}: ${c.items.join(', ')}`).join('\n');
+  renderStats(); renderAdminCal(); renderAppts();
+}
+
+function renderStats() {
+  const td = todayStr();
+  const ap = data.appointments;
+  document.getElementById('statTotal').textContent = ap.filter(a=>a.status!=='cancelled').length;
+  document.getElementById('statToday').textContent = ap.filter(a=>a.date===td&&a.status!=='cancelled').length;
+  document.getElementById('statPending').textContent = ap.filter(a=>a.status==='pending').length;
+}
+
+function saveSettings() {
+  const name = document.getElementById('clinicName').value.trim();
+  const newPwd = document.getElementById('newPwd').value;
+  const depts = document.getElementById('deptInput').value.split(',').map(d=>d.trim()).filter(Boolean);
+  if (name) data.clinicName = name;
+  if (newPwd) data.adminPwd = newPwd;
+  if (depts.length) data.depts = depts;
+  data.sessions.morning.name   = document.getElementById('nameM').value || '早診';
+  data.sessions.afternoon.name = document.getElementById('nameA').value || '午診';
+  data.sessions.evening.name   = document.getElementById('nameE').value || '晚診';
+  data.sessions.morning.time   = document.getElementById('timeM').value;
+  data.sessions.afternoon.time = document.getElementById('timeA').value;
+  data.sessions.evening.time   = document.getElementById('timeE').value;
+  save(); updateHeaderName(); showToast('設定已儲存', 'success');
+}
+
+function saveTreatItems() {
+  const cats = document.getElementById('treatItemsInput').value
+    .split('\n').map(l => l.trim()).filter(Boolean)
+    .map(line => {
+      const idx = line.indexOf(':');
+      if (idx < 0) return null;
+      const name  = line.slice(0, idx).trim();
+      const items = line.slice(idx + 1).split(',').map(s => s.trim()).filter(Boolean);
+      return name && items.length ? { name, items } : null;
+    }).filter(Boolean);
+  if (!cats.length) { showToast('格式有誤，請檢查', 'error'); return; }
+  data.treatCategories = cats;
+  save();
+  showToast(`已儲存 ${cats.length} 個分類`, 'success');
+}
+
+function resetTreatItems() {
+  if (!confirm('確定要還原為預設牙科治療分類嗎？')) return;
+  data.treatCategories = defaultData().treatCategories;
+  document.getElementById('treatItemsInput').value = data.treatCategories
+    .map(c => `${c.name}: ${c.items.join(', ')}`).join('\n');
+  save();
+  showToast('已還原預設分類', 'success');
+}
+
+// ===== 管理端日曆 =====
+function renderAdminCal() {
+  document.getElementById('adminCalMonth').textContent = `${adminCalY} 年 ${MO[adminCalM]}`;
+  const g = document.getElementById('adminCalGrid');
+  g.innerHTML = '';
+  WK.forEach(w => { const h=document.createElement('div'); h.className='cal-hd'; h.textContent=w; g.appendChild(h); });
+
+  const firstDay = new Date(adminCalY, adminCalM, 1).getDay();
+  const days = new Date(adminCalY, adminCalM+1, 0).getDate();
+
+  for(let i=0;i<firstDay;i++){
+    const e=document.createElement('div'); e.className='admin-cal-cell'; g.appendChild(e);
+  }
+  for(let d=1;d<=days;d++){
+    const ds=`${adminCalY}-${String(adminCalM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cell=document.createElement('div');
+    cell.className='admin-cal-cell';
+
+    const dObj=new Date(adminCalY,adminCalM,d);
+    const isPast=dObj<today;
+    const isWE=dObj.getDay()===0||dObj.getDay()===6;
+    const isToday=ds===todayStr();
+
+    const num=document.createElement('div');
+    num.className='day-num';
+    if(isToday) cell.classList.add('today');
+    if(isWE) cell.classList.add('weekend');
+    num.textContent=d;
+    cell.appendChild(num);
+
+    const sch=data.schedule[ds]||{};
+    const row=document.createElement('div');
+    row.className='session-toggle-row';
+
+    SESSION_KEYS.forEach(s=>{
+      const on=!!sch[s];
+      const btn=document.createElement('span');
+      btn.className=`stoggle ${s} ${on?'on':'off'}`;
+      btn.textContent=data.sessions[s]?.name?.[0]||'?';
+      btn.title=`${on?'關閉':'開放'} ${data.sessions[s]?.name||s}`;
+      if(!isPast){
+        btn.onclick=()=>{ toggleSession(ds,s); };
+      } else {
+        btn.style.opacity='0.4'; btn.style.cursor='default';
+      }
+      row.appendChild(btn);
+    });
+    cell.appendChild(row);
+    g.appendChild(cell);
+  }
+}
+function prevAdminMonth(){adminCalM--;if(adminCalM<0){adminCalM=11;adminCalY--;}renderAdminCal();}
+function nextAdminMonth(){adminCalM++;if(adminCalM>11){adminCalM=0;adminCalY++;}renderAdminCal();}
+
+function toggleSession(ds, s) {
+  if (!data.schedule[ds]) data.schedule[ds]={};
+  data.schedule[ds][s] = !data.schedule[ds][s];
+  save(); renderAdminCal(); renderCal();
+  const sName=data.sessions[s]?.name||s;
+  showToast(`${ds} ${sName} 已${data.schedule[ds][s]?'開放':'關閉'}`, 'success');
+}
+
+function getMonthDates() {
+  const dates = [];
+  const start = new Date(adminCalY, adminCalM, 1);
+  const end   = new Date(adminCalY, adminCalM + 1, 0);
+  for (let cur = new Date(start); cur <= end; cur.setDate(cur.getDate() + 1))
+    dates.push(fmtDate(new Date(cur)));
+  return dates;
+}
+
+function applyStandardSchedule() {
+  const dates = getMonthDates();
+  let changed = 0;
+  dates.forEach(ds => {
+    const dow = new Date(ds).getDay();
+    const sess = standardSessions(dow);
+    if (sess) { data.schedule[ds] = { ...sess }; changed++; }
+  });
+  save(); renderAdminCal(); renderCal();
+  showToast(`已套用標準班表（${changed} 天）`, 'success');
+}
+
+function clearMonthSchedule() {
+  if (!confirm('確定要清除本月所有時段嗎？')) return;
+  getMonthDates().forEach(ds => { data.schedule[ds] = { morning:false, afternoon:false, evening:false }; });
+  save(); renderAdminCal(); renderCal();
+  showToast('已清除本月全部時段', 'success');
+}
+
+function getSaturdaysOfMonth() {
+  return getMonthDates().filter(ds => new Date(ds).getDay() === 6);
+}
+
+function toggleSaturdays(open) {
+  const sess = open ? { morning:true, afternoon:true, evening:false } : { morning:false, afternoon:false, evening:false };
+  getSaturdaysOfMonth().forEach(ds => { data.schedule[ds] = { ...sess }; });
+  save(); renderAdminCal(); renderCal();
+  showToast(`本月週六已${open ? '全部開放（早＋午）' : '全部關閉'}`, 'success');
+}
+
+function toggleAlternateSaturdays() {
+  const sats = getSaturdaysOfMonth();
+  sats.forEach((ds, i) => {
+    const open = (i % 2 === 0);
+    data.schedule[ds] = open
+      ? { morning:true, afternoon:true, evening:false }
+      : { morning:false, afternoon:false, evening:false };
+  });
+  save(); renderAdminCal(); renderCal();
+  showToast(`已設定隔週六開診（共 ${Math.ceil(sats.length/2)} 個週六開放）`, 'success');
+}
+
+// ===== 預約清單 =====
+function renderAppts() {
+  const list=document.getElementById('apptList');
+  const fd=document.getElementById('filterDate').value;
+  const fs=document.getElementById('filterSession').value;
+  const fst=document.getElementById('filterStatus').value;
+
+  let appts=[...data.appointments].sort((a,b)=>a.date.localeCompare(b.date)||SESSION_KEYS.indexOf(a.session)-SESSION_KEYS.indexOf(b.session));
+  if(fd) appts=appts.filter(a=>a.date===fd);
+  if(fs) appts=appts.filter(a=>a.session===fs);
+  if(fst) appts=appts.filter(a=>a.status===fst);
+
+  if(!appts.length){ list.innerHTML='<div class="empty-hint">目前無預約紀錄</div>'; return; }
+  list.innerHTML='';
+
+  appts.forEach(appt=>{
+    const item=document.createElement('div');
+    item.className='appt-item';
+
+    const sMap={confirmed:['已確認','status-confirmed'],pending:['待確認','status-pending'],cancelled:['已取消','status-cancelled']};
+    const [sLabel,sCls]=sMap[appt.status]||['未知',''];
+    const icon=SESSION_ICON[appt.session]||'';
+
+    const treats=appt.treatments||[];
+    const treatHtml=treats.length
+      ? treats.map(t=>`<span class="treat-tag">${t.text||''}</span>`).join('')
+      : '';
+
+    item.innerHTML=`
+      <div class="appt-row">
+        <div class="appt-info">
+          <div class="appt-name">${appt.name}</div>
+          <div class="appt-meta">
+            📅 ${appt.date}　${icon} ${appt.sessionName||appt.session}　📞 ${appt.phone}
+            ${appt.note?`<br>📝 ${appt.note}`:''}
+          </div>
+          ${treatHtml?`<div class="treat-display">💊 療程：${treatHtml}</div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;align-items:flex-end;flex-shrink:0">
+          <span class="appt-status ${sCls}">${sLabel}</span>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end">
+            ${appt.status==='pending'?`<button class="btn btn-success btn-sm" onclick="setStatus('${appt.id}','confirmed')">確認</button>`:''}
+            ${appt.status!=='cancelled'?`<button class="btn btn-danger btn-sm" onclick="setStatus('${appt.id}','cancelled')">取消</button>`:''}
+          </div>
+        </div>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+function setStatus(id, status) {
+  const appt=data.appointments.find(a=>a.id===id);
+  if(!appt) return;
+  appt.status=status;
+  save(); renderAdminView();
+  showToast(status==='confirmed'?'已確認預約':'已取消預約','success');
+}
+
+function clearFilters() {
+  document.getElementById('filterDate').value='';
+  document.getElementById('filterSession').value='';
+  document.getElementById('filterStatus').value='';
+  renderAppts();
+}
+
+// ===== 患者歷史資料庫 autocomplete =====
+let acIndex = -1;
+
+const SEED_PATIENTS = [["林敏和",8],["陳雲玉",7],["高宗妙",7],["廖華白",6],["葉斯貴",6],["方許麗香",6],["江文章",6],["周蓮青",6],["朱寶蓮",5],["黃秋英",5],["游連桂",5],["林蔭",5],["楊智欽",5],["簡淑芬",5],["林麗娟",5],["于蔡玉鶴",5],["趙美理",5],["劉茂田",5],["王朝佑",4],["李彥秋",4],["蔡承翰",4],["張時",4],["楊月霞",4],["高碧琴",4],["韓文孟",4],["劉強生",4],["陳桂花",4],["林月鳳",4],["蔡詠欣",4],["鄒偉伯",4],["曾文宏",4],["謝文豪",4],["林意容",4],["王凱弘",4],["鄭盈筑",4],["梁紀葳",4],["蔡文毅",4],["黃敏燕",4],["張鐘霖",4],["余幸蓉",4],["饒鐵樹",4],["韓丹",4],["陳芷羚",4],["鄭慧敏",4],["陳慧蓉",3],["謝智凱",3],["都永辰",3],["吳孟珠",3],["黃春淦",3],["林美利",3],["陳頌光",3],["許建泰",3],["吳佳玲",3],["楊丞威",3],["郭維國",3],["吳睿騰",3],["史艾克",3],["倪韶永",3],["郭素蓮",3],["吳怡靜",3],["楊正豐",3],["黃書筠",3],["黃協成",3],["黎于萍",3],["黃明吉",3],["唐英哲",3],["李雅惠",3],["賴靖國",3],["林勤倉",3],["湯守榮",3],["詹鳳霞",3],["陳雲平",3],["鄭馮錦玲",3],["彭豔飛",3],["張杉",3],["許林碧珠",3],["李明珠",3],["周翊華",3],["魏顯傑",3],["洪張阿綢",3],["蔡語珊",3],["王世芾",3],["張育繻",3],["王姿乃",3],["張琇涵",3],["方婕睿",3],["陳正國",2],["吳東男",2],["陳奕安",2],["黃雅臻",2],["彭建成",2],["林美子",2],["邱美香",2],["尹運修",2],["張衫",2],["蔡水寶",2],["黃張蘭嬌",2],["陳林瓊碧",2],["林恩如",2],["賴敏惠",2],["林音儒",2],["張秀涵",2],["張榕棻",2],["許博正",2],["黃琳嘉",2],["吳桂禎",2],["洪秋海",2],["張世孟",2],["王立群",2],["石雅馨",2],["陳鳳梅",2],["賴錦勝",2],["周麟昇",2],["曾國輔",2],["蔡雨珊",2],["王佳文",2],["吳淑女",2],["李彩縈",2],["吳簡清連",2],["何元魁",2],["黃宣甄",2],["張淑惠",2],["黎玲君",2],["楊曉蓉",2],["翁志成",2],["詹含笑",2],["劉淑美",2],["李陳宜",2],["何文馨",2],["黃美春",2],["余天授",2],["吳啟立",2],["簡嘉妤",2],["陳世斌",2],["張祐糸",2],["余懷安",2],["張峻睿",2],["張育凡",2],["王肇陽",2],["鐘源忠",2],["朱美容",2],["林加燁",2],["梁詩雨",2],["陳虹諭",2],["李采縈",2],["陳生迪",2],["陳誠雄",2],["達安娜",2],["張志明",2],["賀筠雲",2],["黃美麗",2],["黃樹錦",2],["吳瑀倫",2],["徐博正",2],["張佑糸",2],["林秀芳",2],["周芳戎",2],["王聖博",2],["曾金茂",2],["于瓊娟",2],["許清豐",2],["葉明勳",2],["江靜雯",2],["鄭創棋",2],["許睿倢",2],["曾韻年",2],["陳震錮",2],["陳永興",2],["陳虹瑜",2],["石學季",2],["王益暉",1],["王易飛",1],["邱詩瑛",1],["蔡文義",1],["林姿秀",1],["鄭馮景玲",1],["鐘間滿",1],["陳孟朮",1],["黃玉賢",1],["林益全",1],["楊東謀",1],["陳宏毅",1],["邱祺修",1],["雅玉",1],["林美珍",1],["徐淳昊",1],["賴孟儀",1],["陳怡如",1],["余佑安",1],["蘇芸昀",1],["吳嘉祥",1],["陳翠玲",1],["溫秋遠",1],["高明仁",1],["曹月裡",1],["王芃芸",1],["張玉如",1],["劉奕威",1],["簡石繡花",1],["陳頤仁",1],["蔡素枝",1],["王仙桂",1],["陳秋涼",1],["黃李杏枝",1],["林維華",1],["張豐",1],["陳正隆",1],["王美秀",1],["陳棋萍",1],["林秀英",1],["原志永",1],["王雅惠",1],["陳燕琪",1],["陳惠蘭",1],["林秀芬",1],["許金菊",1],["蘇湘琴",1],["王仁熙",1],["陳勝智",1],["涂秀美",1],["張豐凱",1],["盧黃玉倫",1],["黃捷家",1],["紀冠如",1],["巫逸慈",1],["吳簡青蓮",1],["楊淑琪",1],["洪建成",1],["鄭英真",1],["何明憲",1],["余王明杏",1],["宋成瑜",1],["許嘉琦",1],["陳志瑋",1],["張凱",1],["張忠霖",1],["楊喬瑜",1],["馮宜嫻",1],["陳新陽",1],["李文祥",1],["宣寶莉",1],["趙梓民",1],["王玲玲",1],["陳金鳳",1],["高靖琦",1],["陳奇叡",1],["楊元碩",1],["鄭恩儀",1],["張俊睿",1],["許元玲",1],["陳佩怡",1],["陳佩儀",1],["黃玉婷",1],["黃紹恩",1],["蔡耀煌",1],["吳雲菲",1],["陳奇敬",1],["周東琴",1],["周文隆",1],["陳寶猜",1],["康永勛",1],["江志忠",1],["王世福",1],["粘紹勇",1],["詹庚佑",1],["劉曉琪",1],["余天受",1],["黃昭南教",1],["曾記維",1],["鶴圓圓",1],["李鳳珠",1],["陳惠容",1],["曾馨慧",1],["許水枝",1],["林麗珠",1],["高聖傑",1],["楊惠琪",1],["林婷玉",1],["施睿欣",1],["蔡美惠",1],["施睿貞",1],["許瑞傑",1],["蘇婉玲",1],["黃思薇",1],["鄭美麗",1],["李玉勻",1],["羅純敏",1],["鄭宇珊",1],["王兆實",1],["唐志春",1],["鐘建滿",1],["張育儒",1],["王威揚",1],["徐時強",1],["林昀熹",1],["黃麗燁",1],["何倚威",1],["張素燕",1],["王臣萍",1],["邱瑀倫",1],["周良展",1],["陳孟竹",1],["馬世方",1],["盧正倫",1],["張舜傑",1],["劉昭燕",1],["林春好",1],["劉志芳",1],["黃冠嘉",1],["莊瑜玲",1],["林大偉",1],["曾子玲",1],["林龍珠",1],["林瑞展",1],["黃秀玲",1],["楊承威",1],["吳明田",1],["王盛郎",1],["易彩雲",1],["邱嘉駿",1],["洪張阿軸",1],["黃文燦",1],["楊明月",1],["姚叔安",1],["張宜玲",1],["蔡ㄧ萍",1],["曾德水",1],["陳秋芬",1],["王美琇",1],["魏愛勻",1],["張則鈞",1],["陳瑜芳",1],["許建合",1],["林思臣",1],["陳昀臻",1],["吳玉芬",1],["鄭秉峰",1],["林佩瑩",1],["陳文漢",1],["林麗琴",1],["黃耀霆",1],["婁荷花",1],["陳慧龍",1],["蘇郁勻",1],["黃鈺婷",1],["吳妘菲",1],["唐玉婷",1],["吳宗彥",1],["洪平",1],["張藝薰",1],["陳姿蓉",1],["翁羚容",1],["林克倫",1],["張紘瑞",1],["詹明香",1],["陸廷隅",1],["魏嘉芊",1],["陳慧蘭",1],["朱定國",1],["向雯芳",1],["楊宗達",1],["蘇開儀",1],["李智惠",1],["李姿瑩",1],["陳伶潔",1],["王慈襄",1],["謝明其",1],["楊定豪",1],["黃慶華",1],["蘇婉菱",1],["陳文清",1],["黃思微",1],["郭紘華",1],["陳為仁",1],["陳姵如",1],["鄭羽杉",1],["李詮勝",1],["王仁洵",1],["黃狄",1],["郭佩青",1],["陳臻",1],["陳宏翊",1],["趙子文",1],["劉豈均",1],["陳其瑞",1],["周錦霞",1],["楊彭雲卿",1],["趙美里",1],["許俊卿",1],["黃張蘭矯",1],["蔡桂蘭",1],["何宜蓁",1],["鐘正?",1],["韓寶逸",1],["蕭陳麗卿",1],["陳林瓊璧",1],["王晟翔",1],["林以恆",1],["梁耀",1],["候明君",1],["郭約翰",1],["莊明穎",1],["郭芳成",1],["陳源明",1],["林瑞龍",1],["李沛玲",1],["陳志榮",1],["郭典育",1],["王中億",1],["戴紘騰",1],["許莉雯",1],["吳是融",1],["陳?瑜",1],["黃文誠",1],["林蓮香",1],["張余?花",1],["郭水興",1],["鄭英珍",1],["林庭樂",1],["邱淑英",1],["劉復漢",1],["鄭月娥",1],["黃冠綸",1],["謝彥彬",1],["何倚崴",1],["洪華琴",1],["陳睿宇",1],["王詩貽",1],["吳揫農",1],["邱麒修",1],["邱定夫",1],["石秀鳳",1],["謝文凱",1],["許芷宣",1],["黃泰河",1],["陳盈利",1],["余辛蓉",1],["黃家輝",1],["江錦龍",1],["高郁茜",1],["曾洎維",1],["陳學勳",1],["吳簡清蓮",1],["曾睦秋",1],["黃郁婷",1],["林月秀",1],["陳棋睿",1],["伍家樂",1],["陳品宣",1],["林戎",1],["張淑如",1],["陳亮熙",1],["張麗娜",1],["李寧臺",1],["楊雅惠",1],["陳美娟",1],["劉漢遠",1],["徐變",1],["潘嘉祤",1],["陳月榮",1],["劉曉燕",1],["許丹瓊",1],["王麗君",1],["劉沛鑫",1],["陳春桃",1],["李彥萩",1],["吳葉秀蘭",1],["吳芳梅",1],["林宜豐",1],["蘇鈺琇",1],["陳宇霆",1],["張齡尹",1],["鄭高招治",1],["達安那",1],["楊上萱",1],["王明演",1],["裴氏記",1],["王宜婷",1],["高陳雅雅",1],["陳昱全",1],["曾瑄瑋",1],["楊曉佩",1],["陳兆茂",1],["賴芊甯",1],["余曉嵐",1],["郭素連",1],["蘇苡芯",1],["洪義雄",1],["巫逸綺",1],["黃秉鈞",1],["張躍寶",1],["陳宥希",1],["吳杰恩",1],["吳三林",1],["戴王敏",1],["許申華",1],["彭琨証",1],["張年子",1],["林玉梅",1],["呂柏勳",1],["楊馥至",1],["黃世志",1],["陳寶彩",1],["董昕穎",1],["吳籽沂",1],["洪昌明",1],["林有仁",1],["陳宥薰",1],["陳畇蓁",1],["周閨秀",1],["施昭明",1],["李詹素菊",1],["劉福來",1],["蔡欣釗",1],["許國豐",1],["陳悅彤",1],["李書榮",1],["林威廷",1],["黃慶煌",1],["陳子甯",1],["蘇筱筑",1],["陳立齊",1],["陳怡政",1]];
+
+function getPatientDB() {
+  // 先以種子資料（Google Sheets 歷史）建立基礎
+  const map = new Map();
+  SEED_PATIENTS.forEach(([name, visits]) => {
+    map.set(name, { name, phone:'', visits });
+  });
+  // 再疊加 localStorage 預約紀錄（可覆蓋電話，就診數累加）
+  [...data.appointments]
+    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+    .forEach(a => {
+      if (!a.name) return;
+      if (map.has(a.name)) {
+        const p = map.get(a.name);
+        if (a.phone) p.phone = a.phone;
+        p.visits++;
+      } else {
+        map.set(a.name, { name:a.name, phone:a.phone||'', visits:1 });
+      }
+    });
+  return [...map.values()].sort((a, b) => b.visits - a.visits);
+}
+
+function acInput(q) {
+  const dd = document.getElementById('acDropdown');
+  acIndex = -1;
+  const db = getPatientDB();
+  const kw = q.trim();
+  const results = kw
+    ? db.filter(p => p.name.includes(kw) || p.phone.includes(kw))
+    : db.slice(0, 8);
+
+  if (results.length === 0) {
+    dd.innerHTML = `<div class="ac-empty">查無「${kw}」的歷史紀錄，將新增為新患者</div>`;
+    dd.classList.add('open');
+    document.getElementById('returningTag').style.display = 'none';
+    return;
+  }
+
+  dd.innerHTML = '';
+  results.slice(0, 10).forEach((p, i) => {
+    const item = document.createElement('div');
+    item.className = 'ac-item';
+    item.dataset.idx = i;
+    item.innerHTML = `
+      <div>
+        <div class="ac-name">${highlight(p.name, kw)}</div>
+        <div class="ac-meta">${p.phone}</div>
+      </div>
+      <span class="ac-badge">就診 ${p.visits} 次</span>`;
+    item.onmousedown = () => acSelect(p);
+    dd.appendChild(item);
+  });
+  dd.classList.add('open');
+}
+
+function highlight(text, kw) {
+  if (!kw) return text;
+  return text.replace(new RegExp(kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'g'),
+    m => `<mark style="background:#fff9c4;border-radius:2px">${m}</mark>`);
+}
+
+function acSelect(p) {
+  document.getElementById('patientName').value = p.name;
+  document.getElementById('patientPhone').value = p.phone;
+  document.getElementById('returningTag').style.display = 'inline-flex';
+  acClose();
+}
+
+function acClose() {
+  document.getElementById('acDropdown').classList.remove('open');
+  acIndex = -1;
+}
+
+function acKeydown(e) {
+  const dd = document.getElementById('acDropdown');
+  const items = dd.querySelectorAll('.ac-item');
+  if (!dd.classList.contains('open') || !items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    acIndex = Math.min(acIndex + 1, items.length - 1);
+    items.forEach((el, i) => el.classList.toggle('focused', i === acIndex));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    acIndex = Math.max(acIndex - 1, 0);
+    items.forEach((el, i) => el.classList.toggle('focused', i === acIndex));
+  } else if (e.key === 'Enter' && acIndex >= 0) {
+    e.preventDefault();
+    items[acIndex].onmousedown();
+  } else if (e.key === 'Escape') {
+    acClose();
+  }
+}
+
+// 切換時段或重新填表時清除舊患者標記
+function clearReturningTag() {
+  document.getElementById('returningTag').style.display = 'none';
+}
+
+// ===== Toast =====
+let toastTimer;
+function showToast(msg, type='') {
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.className='toast'+(type?' '+type:'')+' show';
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+init();
+
+// ── 語音輸入 ──────────────────────────────────────────
+let voiceActive = null;
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+function startVoice(targetId) {
+  if (!SR) { showToast('此瀏覽器不支援語音輸入', 'error'); return; }
+  const btn = document.querySelector(`[data-mic="${targetId}"]`);
+  const el  = document.getElementById(targetId);
+
+  if (voiceActive) {
+    voiceActive.stop();
+    voiceActive = null;
+    return;
+  }
+
+  const rec = new SR();
+  rec.lang = 'zh-TW';
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
+  voiceActive = rec;
+  btn && btn.classList.add('recording');
+
+  const base = el.value;
+  rec.onresult = (e) => {
+    const interim = [...e.results].map(r => r[0].transcript).join('');
+    el.value = base + interim;
+    if (targetId === 'patientName') acInput(el.value);
+  };
+
+  rec.onend = () => {
+    voiceActive = null;
+    btn && btn.classList.remove('recording');
+    if (targetId === 'patientName') acInput(el.value);
+  };
+
+  rec.onerror = (e) => {
+    voiceActive = null;
+    btn && btn.classList.remove('recording');
+    if (e.error !== 'no-speech') showToast('語音辨識錯誤：' + e.error, 'error');
+  };
+
+  rec.start();
+}
+</script>
+</body>
+</html>
